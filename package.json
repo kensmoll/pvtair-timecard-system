@@ -1,0 +1,19 @@
+{
+  "name": "pvtair-timecard-system",
+  "version": "1.0.0",
+  "description": "PVTAIR Employee Timecard Management System",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "build": "echo 'No build step required for static site'"
+  },
+  "keywords": [
+    "timecard",
+    "employee",
+    "aviation",
+    "payroll"
+  ],
+  "author": "PVTAIR",
+  "license": "MIT",
+  "homepage": "https://pvtair-timecard-system.netlify.app"
+}
