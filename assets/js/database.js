@@ -6,6 +6,7 @@ class PVTAIRGoogleSheetsDB {
         // Replace these with your actual values
         this.SPREADSHEET_ID = '1Jo39kWkJcNF-LEymNXmL8PgjipoEDvByyeI71YiElIs';
         this.API_KEY = 'AIzaSyC5jWKcsb5LyYFHmGtOEEIAT6tIt0hPZs8';
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbywtkqW4sWEdw6rOvMoIDLWV_UqC1UiF97_KZW5myAbaQzTwtVevVRDNo2cgBALK7VP/exec';
         this.BASE_URL = 'https://sheets.googleapis.com/v4/spreadsheets';
         
         this.SHEETS = {
