@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVTAIR - Employee Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2C2C2C 0%, #4A4A4A 30%, #666666 70%, #A8A8A8 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            border: 1px solid rgba(168, 168, 168, 0.3);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1A1A1A 0%, #333333 50%, #4A4A4A 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .company-name {
+            color: #A8A8A8;
+            font-size: 3.5em;
+            font-weight: 300;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+            letter-spacing: 8px;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .tagline {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+            color: #CCCCCC;
+        }
+        
+        .content {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .portal-card {
+            background: linear-gradient(135deg, #FFFFFF, #F8FAFC);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #E5E5E5;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .portal-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: #7C3AED;
+        }
+        
+        .portal-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .portal-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .portal-description {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .employee-portal { border-color: #10B981; }
+        .admin-portal { border-color: #DC2626; }
+        .reports-portal { border-color: #7C3AED; }
+        
+        .footer {
+            background: #F8FAFC;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #E5E5E5;
+        }
+        
+        @media (max-width: 768px) {
+            .company-name {
+                font-size: 2.5em;
+                letter-spacing: 4px;
+            }
+            
+            .portal-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="company-name">PVTAIR</div>
+            <div class="tagline">Employee Portal</div>
+            <div class="subtitle">Timecard Management System</div>
+        </div>
+        
+        <div class="content">
+            <h2 style="color: #333; margin-bottom: 20px;">Welcome to PVTAIR</h2>
+            <p style="color: #666; font-size: 1.1em; line-height: 1.6;">
+                Select your portal below to access timecards, reports, or system administration.
+            </p>
+            
+            <div class="portal-grid">
+                <a href="/timecard/" class="portal-card employee-portal">
+                    <div class="portal-icon">👨‍✈️</div>
+                    <div class="portal-title">Employee Timecards</div>
+                    <div class="portal-description">
+                        Submit your weekly timecard with flight hours, maintenance time, and administrative work.
+                    </div>
+                </a>
+                
+                <a href="/reports/" class="portal-card reports-portal">
+                    <div class="portal-icon">📊</div>
+                    <div class="portal-title">Reports Dashboard</div>
+                    <div class="portal-description">
+                        View real-time hours tracking, payroll calculations, and employee status reports.
+                    </div>
+                </a>
+                
+                <a href="/admin/" class="portal-card admin-portal">
+                    <div class="portal-icon">⚙️</div>
+                    <div class="portal-title">System Administration</div>
+                    <div class="portal-description">
+                        Manage employees, supervisors, pay rates, and system settings. Admin access required.
+                    </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2024 PVTAIR. All rights reserved. | Version 1.0</p>
+        </div>
+    </div>
+</body>
+</html>
