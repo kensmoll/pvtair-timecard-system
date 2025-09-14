@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVTAIR - Admin System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2C2C2C 0%, #4A4A4A 30%, #666666 70%, #A8A8A8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            overflow: visible;
+            border: 1px solid rgba(168, 168, 168, 0.3);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1A1A1A 0%, #333333 50%, #4A4A4A 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .company-name {
+            color: #A8A8A8;
+            font-size: 2.8em;
+            font-weight: 300;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+            letter-spacing: 6px;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: white;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            font-weight: 300;
+            color: #CCCCCC;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: linear-gradient(135deg, #F8FAFC, #E2E8F0);
+            border-bottom: 3px solid #1A1A1A;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 22px 15px;
+            text-align: center;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #334155;
+            transition: all 0.3s ease;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .nav-tab:hover {
+            background: linear-gradient(135deg, #E2E8F0, #CBD5E1);
+            transform: translateY(-3px);
+            color: #1A1A1A;
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #1A1A1A, #333333);
+            color: #A8A8A8;
+            box-shadow: 0 -5px 15px rgba(26, 26, 26, 0.3);
+        }
+        
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #A8A8A8, #CCCCCC);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 35px;
+            background: linear-gradient(135deg, #FAFAFA, #F8FAFC);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #1E293B;
+            font-size: 1.05em;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #CCCCCC;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #333333;
+            box-shadow: 0 0 0 4px rgba(51, 51, 51, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #1A1A1A, #333333);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, #333333, #4A4A4A);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #DC2626, #B91C1C);
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+            background: linear-gradient(135deg, #B91C1C, #991B1B);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #059669, #10B981);
+        }
+        
+        .btn-success:hover {
+            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
+            background: linear-gradient(135deg, #10B981, #34D399);
+        }
+        
+        .card-grid {
+            display: grid;
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, #FFFFFF, #F8FAFC);
+            padding: 30px;
+            border-radius: 18px;
+            border: 2px solid #E5E5E5;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(26, 26, 26, 0.15);
+            border-color: #333333;
+        }
+        
+        .card-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 18px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .rate-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+        
+        .rate-item {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #E5E5E5;
+        }
+        
+        .alert {
+            padding: 18px;
+            border-radius: 12px;
+            margin: 25px 0;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+            color: #065F46;
+            border: 2px solid #A7F3D0;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+            color: #92400E;
+            border: 2px solid #FDE68A;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .tooltip-editor {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .tooltip-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #E5E5E5;
+        }
+        
+        .tooltip-category {
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .rate-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .company-name {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="company-name">PVTAIR</div>
+            <h1>Admin System</h1>
+            <p>Manage Pilots, Supervisors, and System Settings</p>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('pilots')">Pilot Management</button>
+            <button class="nav-tab" onclick="switchTab('supervisors')">Supervisor Management</button>
+            <button class="nav-tab" onclick="switchTab('tooltips')">Edit Tooltips</button>
+        </div>
+        
+        <!-- Pilot Management Tab -->
+        <div id="pilots" class="tab-content active">
+            <h2 style="color: #333333; margin-bottom: 20px;">👨‍✈️ Pilot Management</h2>
+            
+            <div class="form-group">
+                <label for="pilotName">Pilot Name:</label>
+                <input type="text" id="pilotName" placeholder="Enter pilot name">
+            </div>
+            
+            <div class="form-group">
+                <label for="baseSalary">Monthly Base Salary (optional):</label>
+                <input type="number" id="baseSalary" step="0.01" placeholder="Enter base salary if applicable">
+            </div>
+            
+            <div class="rate-grid">
+                <div class="rate-item">
+                    <label for="revFlight">Rev Flight (Daily):</label>
+                    <input type="number" id="revFlight" step="0.01" placeholder="$0.00">
+                </div>
+                <div class="rate-item">
+                    <label for="nonRevFlight">Non Rev Flight (Daily):</label>
+                    <input type="number" id="nonRevFlight" step="0.01" placeholder="$0.00">
+                </div>
+                <div class="rate-item">
+                    <label for="nonRevNonFlight">Non Rev/Non Flight (Daily):</label>
+                    <input type="number" id="nonRevNonFlight" step="0.01" placeholder="$0.00">
+                </div>
+                <div class="rate-item">
+                    <label for="mxHourly">MX (Hourly):</label>
+                    <input type="number" id="mxHourly" step="0.01" placeholder="$0.00">
+                </div>
+                <div class="rate-item">
+                    <label for="adminHourly">Admin (Hourly):</label>
+                    <input type="number" id="adminHourly" step="0.01" placeholder="$0.00">
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="btn" onclick="savePilot()">💾 Save Pilot</button>
+                <button class="btn btn-danger" onclick="clearPilotForm()" style="margin-left: 15px;">🗑️ Clear Form</button>
+            </div>
+            
+            <div class="card-grid" id="pilotsGrid">
+                <!-- Saved pilots will appear here -->
+            </div>
+        </div>
+        
+        <!-- Supervisor Management Tab -->
+        <div id="supervisors" class="tab-content">
+            <h2 style="color: #333333; margin-bottom: 20px;">👥 Supervisor Management</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="supervisorName">Supervisor Name:</label>
+                    <input type="text" id="supervisorName" placeholder="Enter supervisor name">
+                </div>
+                <div class="form-group">
+                    <label for="supervisorEmail">Email Address:</label>
+                    <input type="email" id="supervisorEmail" placeholder="supervisor@pvtair.com">
+                </div>
+                <div class="form-group">
+                    <label for="supervisorTitle">Title/Position:</label>
+                    <input type="text" id="supervisorTitle" placeholder="e.g., Chief Pilot, Operations Manager">
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <button class="btn" onclick="saveSupervisor()">💾 Add Supervisor</button>
+                <button class="btn btn-danger" onclick="clearSupervisorForm()" style="margin-left: 15px;">🗑️ Clear Form</button>
+            </div>
+            
+            <div class="card-grid" id="supervisorsGrid">
+                <!-- Saved supervisors will appear here -->
+            </div>
+        </div>
+        
+        <!-- Tooltip Management Tab -->
+        <div id="tooltips" class="tab-content">
+            <h2 style="color: #333333; margin-bottom: 20px;">💬 Edit Tooltips</h2>
+            <p style="color: #666; margin-bottom: 30px; font-size: 1.1em;">
+                Edit the explanatory text that appears when users hover over the "?" icons in timecard columns.
+            </p>
+            
+            <div class="tooltip-editor" id="tooltipEditor">
+                <!-- Tooltip editors will appear here -->
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-success" onclick="saveTooltips()">💾 Save All Tooltips</button>
+                <button class="btn btn-danger" onclick="resetTooltips()" style="margin-left: 15px;">🔄 Reset to Defaults</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pilots = [];
+        let supervisors = [];
+        
+        let categoryExplanations = {
+            revFlight: "Revenue Flight: Revenue-generating charter flights with passengers or cargo",
+            nonRevFlight: "Non-Revenue Flight: Positioning flights, maintenance flights, or training flights",
+            nonRevNonFlight: "Non-Revenue/Non-Flight: Ground duties like flight planning, briefings, standby time",
+            mx: "Maintenance (MX): Aircraft maintenance, inspections, or maintenance supervision",
+            admin: "Administrative: Office work, paperwork, meetings, training sessions"
+        };
+        
+        const categoryNames = {
+            revFlight: "Revenue Flight",
+            nonRevFlight: "Non-Revenue Flight", 
+            nonRevNonFlight: "Non-Revenue/Non-Flight",
+            mx: "Maintenance (MX)",
+            admin: "Administrative"
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSampleData();
+            generateTooltipEditor();
+        });
+        
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Find and activate the corresponding nav tab
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => {
+                if (tab.getAttribute('onclick').includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+        
+        function loadSampleData() {
+            // Sample pilots
+            pilots = [
+                {
+                    name: "John Smith",
+                    baseSalary: 5000,
+                    rates: {
+                        revFlight: 450,
+                        nonRevFlight: 350,
+                        nonRevNonFlight: 300,
+                        mxHourly: 45,
+                        adminHourly: 35
+                    }
+                },
+                {
+                    name: "Sarah Johnson",
+                    baseSalary: 0,
+                    rates: {
+                        revFlight: 500,
+                        nonRevFlight: 400,
+                        nonRevNonFlight: 350,
+                        mxHourly: 50,
+                        adminHourly: 40
+                    }
+                },
+                {
+                    name: "Mike Wilson",
+                    baseSalary: 4500,
+                    rates: {
+                        revFlight: 425,
+                        nonRevFlight: 325,
+                        nonRevNonFlight: 275,
+                        mxHourly: 42,
+                        adminHourly: 32
+                    }
+                }
+            ];
+            
+            // Sample supervisors
+            supervisors = [
+                {
+                    name: "Mike Anderson",
+                    email: "m.anderson@pvtair.com",
+                    title: "Chief Pilot"
+                },
+                {
+                    name: "Lisa Roberts", 
+                    email: "l.roberts@pvtair.com",
+                    title: "Operations Manager"
+                },
+                {
+                    name: "Tom Wilson",
+                    email: "t.wilson@pvtair.com",
+                    title: "Flight Operations Supervisor"
+                }
+            ];
+            
+            displayPilots();
+            displaySupervisors();
+        }
+        
+        // Pilot Management Functions
+        function savePilot() {
+            const name = document.getElementById('pilotName').value.trim();
+            if (!name) {
+                alert('Please enter a pilot name');
+                return;
+            }
+            
+            const pilot = {
+                name: name,
+                baseSalary: parseFloat(document.getElementById('baseSalary').value) || 0,
+                rates: {
+                    revFlight: parseFloat(document.getElementById('revFlight').value) || 0,
+                    nonRevFlight: parseFloat(document.getElementById('nonRevFlight').value) || 0,
+                    nonRevNonFlight: parseFloat(document.getElementById('nonRevNonFlight').value) || 0,
+                    mxHourly: parseFloat(document.getElementById('mxHourly').value) || 0,
+                    adminHourly: parseFloat(document.getElementById('adminHourly').value) || 0
+                }
+            };
+            
+            // Check if pilot already exists
+            const existingIndex = pilots.findIndex(p => p.name === pilot.name);
+            if (existingIndex >= 0) {
+                pilots[existingIndex] = pilot;
+            } else {
+                pilots.push(pilot);
+            }
+            
+            displayPilots();
+            clearPilotForm();
+            showAlert('Pilot saved successfully!', 'success');
+        }
+        
+        function clearPilotForm() {
+            document.getElementById('pilotName').value = '';
+            document.getElementById('baseSalary').value = '';
+            document.getElementById('revFlight').value = '';
+            document.getElementById('nonRevFlight').value = '';
+            document.getElementById('nonRevNonFlight').value = '';
+            document.getElementById('mxHourly').value = '';
+            document.getElementById('adminHourly').value = '';
+        }
+        
+        function deletePilot(index) {
+            if (confirm('Are you sure you want to delete this pilot?')) {
+                pilots.splice(index, 1);
+                displayPilots();
+                showAlert('Pilot deleted successfully!', 'success');
+            }
+        }
+        
+        function editPilot(index) {
+            const pilot = pilots[index];
+            document.getElementById('pilotName').value = pilot.name;
+            document.getElementById('baseSalary').value = pilot.baseSalary;
+            document.getElementById('revFlight').value = pilot.rates.revFlight;
+            document.getElementById('nonRevFlight').value = pilot.rates.nonRevFlight;
+            document.getElementById('nonRevNonFlight').value = pilot.rates.nonRevNonFlight;
+            document.getElementById('mxHourly').value = pilot.rates.mxHourly;
+            document.getElementById('adminHourly').value = pilot.rates.adminHourly;
+            
+            // Switch to pilots tab
+            switchTab('pilots');
+        }
+        
+        function displayPilots() {
+            const grid = document.getElementById('pilotsGrid');
+            if (pilots.length === 0) {
+                grid.innerHTML = '<div class="alert alert-warning">No pilots added yet. Use the form above to add pilots.</div>';
+                return;
+            }
+            
+            grid.innerHTML = pilots.map((pilot, index) => `
+                <div class="card">
+                    <div class="card-title">${pilot.name}</div>
+                    <div class="rate-grid">
+                        <div class="rate-item">
+                            <label>Base Salary:</label>
+                            <strong>$${pilot.baseSalary.toFixed(2)}</strong>
+                        </div>
+                        <div class="rate-item">
+                            <label>Rev Flight:</label>
+                            <strong>$${pilot.rates.revFlight.toFixed(2)}/day</strong>
+                        </div>
+                        <div class="rate-item">
+                            <label>Non Rev Flight:</label>
+                            <strong>$${pilot.rates.nonRevFlight.toFixed(2)}/day</strong>
+                        </div>
+                        <div class="rate-item">
+                            <label>Non Rev/Non Flight:</label>
+                            <strong>$${pilot.rates.nonRevNonFlight.toFixed(2)}/day</strong>
+                        </div>
+                        <div class="rate-item">
+                            <label>MX:</label>
+                            <strong>$${pilot.rates.mxHourly.toFixed(2)}/hr</strong>
+                        </div>
+                        <div class="rate-item">
+                            <label>Admin:</label>
+                            <strong>$${pilot.rates.adminHourly.toFixed(2)}/hr</strong>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn" onclick="editPilot(${index})" style="margin-right: 10px;">✏️ Edit</button>
+                        <button class="btn btn-danger" onclick="deletePilot(${index})">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Supervisor Management Functions
+        function saveSupervisor() {
+            const name = document.getElementById('supervisorName').value.trim();
+            const email = document.getElementById('supervisorEmail').value.trim();
+            const title = document.getElementById('supervisorTitle').value.trim();
+            
+            if (!name || !email) {
+                alert('Please enter supervisor name and email');
+                return;
+            }
+            
+            const supervisor = {
+                name: name,
+                email: email,
+                title: title
+            };
+            
+            // Check if supervisor already exists
+            const existingIndex = supervisors.findIndex(s => s.email === supervisor.email);
+            if (existingIndex >= 0) {
+                supervisors[existingIndex] = supervisor;
+            } else {
+                supervisors.push(supervisor);
+            }
+            
+            displaySupervisors();
+            clearSupervisorForm();
+            showAlert('Supervisor saved successfully!', 'success');
+        }
+        
+        function clearSupervisorForm() {
+            document.getElementById('supervisorName').value = '';
+            document.getElementById('supervisorEmail').value = '';
+            document.getElementById('supervisorTitle').value = '';
+        }
+        
+        function deleteSupervisor(index) {
+            if (confirm('Are you sure you want to delete this supervisor?')) {
+                supervisors.splice(index, 1);
+                displaySupervisors();
+                showAlert('Supervisor deleted successfully!', 'success');
+            }
+        }
+        
+        function editSupervisor(index) {
+            const supervisor = supervisors[index];
+            document.getElementById('supervisorName').value = supervisor.name;
+            document.getElementById('supervisorEmail').value = supervisor.email;
+            document.getElementById('supervisorTitle').value = supervisor.title;
+            
+            // Switch to supervisors tab
+            switchTab('supervisors');
+        }
+        
+        function displaySupervisors() {
+            const grid = document.getElementById('supervisorsGrid');
+            if (supervisors.length === 0) {
+                grid.innerHTML = '<div class="alert alert-warning">No supervisors added yet. Use the form above to add supervisors.</div>';
+                return;
+            }
+            
+            grid.innerHTML = supervisors.map((supervisor, index) => `
+                <div class="card">
+                    <div class="card-title">${supervisor.name}</div>
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <strong style="font-size: 1.2em;">${supervisor.title}</strong><br>
+                        <span style="color: #666; margin-top: 5px;">${supervisor.email}</span>
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="editSupervisor(${index})" style="margin-right: 10px;">✏️ Edit</button>
+                        <button class="btn btn-danger" onclick="deleteSupervisor(${index})">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Tooltip Management Functions
+        function generateTooltipEditor() {
+            const editor = document.getElementById('tooltipEditor');
+            
+            editor.innerHTML = Object.keys(categoryExplanations).map(category => `
+                <div class="tooltip-item">
+                    <div class="tooltip-category">${categoryNames[category]}</div>
+                    <textarea id="tooltip_${category}" placeholder="Enter tooltip explanation...">${categoryExplanations[category]}</textarea>
+                </div>
+            `).join('');
+        }
+        
+        function saveTooltips() {
+            Object.keys(categoryExplanations).forEach(category => {
+                const textarea = document.getElementById(`tooltip_${category}`);
+                if (textarea) {
+                    categoryExplanations[category] = textarea.value.trim();
+                }
+            });
+            
+            showAlert('Tooltips saved successfully! Changes will appear in new timecard forms.', 'success');
+        }
+        
+        function resetTooltips() {
+            if (confirm('Are you sure you want to reset all tooltips to their default values?')) {
+                categoryExplanations = {
+                    revFlight: "Revenue Flight: Revenue-generating charter flights with passengers or cargo",
+                    nonRevFlight: "Non-Revenue Flight: Positioning flights, maintenance flights, or training flights",
+                    nonRevNonFlight: "Non-Revenue/Non-Flight: Ground duties like flight planning, briefings, standby time",
+                    mx: "Maintenance (MX): Aircraft maintenance, inspections, or maintenance supervision",
+                    admin: "Administrative: Office work, paperwork, meetings, training sessions"
+                };
+                
+                generateTooltipEditor();
+                showAlert('Tooltips reset to default values!', 'success');
+            }
+        }
+        
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            // Insert at top of active tab content
+            const activeTab = document.querySelector('.tab-content.active');
+            activeTab.insertBefore(alertDiv, activeTab.firstChild);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
