@@ -135,7 +135,7 @@ class PVTAIRGoogleSheetsDB {
         return { success: true, message: 'Timecard data prepared for saving' };
     }
 
-    // Test connection
+   // Test connection
     async testConnection() {
         try {
             const employees = await this.getEmployees();
@@ -145,6 +145,113 @@ class PVTAIRGoogleSheetsDB {
         } catch (error) {
             console.error('Database connection failed:', error);
             return false;
+        }
+    }
+
+    // Save timecard data to Google Sheets
+    async saveTimecard(employeeId, date, hours, status = 'Draft') {
+        try {
+            const response = await fetch(this.WEB_APP_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'saveTimecard',
+                    employee_id: employeeId,
+                    date: date,
+                    rev_flight: hours.revFlight || 0,
+                    non_rev_flight_exc: hours.nonRevFlightExc || 0,
+                    non_rev_non_flight: hours.nonRevNonFlight || 0,
+                    mx_hours: hours.mx || 0,
+                    admin_hours: hours.admin || 0,
+                    status: status,
+                    submitted_date: status === 'Submitted' ? new Date().toISOString().split('T')[0] : ''
+                })
+            });
+            
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error('Error saving timecard:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Add new employee
+    async addEmployee(employeeData) {
+        try {
+            const response = await fetch(this.WEB_APP_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'addEmployee',
+                    employee_id: employeeData.employee_id,
+                    name: employeeData.name,
+                    email: employeeData.email,
+                    base_salary: employeeData.base_salary,
+                    rate_rev_flight: employeeData.rate_rev_flight,
+                    rate_non_rev_flight_exc: employeeData.rate_non_rev_flight_exc,
+                    rate_non_rev_non_flight: employeeData.rate_non_rev_non_flight,
+                    rate_mx_hourly: employeeData.rate_mx_hourly,
+                    rate_admin_hourly: employeeData.rate_admin_hourly,
+                    active: employeeData.active
+                })
+            });
+            
+            return await response.json();
+        } catch (error) {
+            console.error('Error adding employee:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Add new supervisor
+    async addSupervisor(supervisorData) {
+        try {
+            const response = await fetch(this.WEB_APP_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'addSupervisor',
+                    name: supervisorData.name,
+                    email: supervisorData.email,
+                    title: supervisorData.title,
+                    active: supervisorData.active
+                })
+            });
+            
+            return await response.json();
+        } catch (error) {
+            console.error('Error adding supervisor:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Update system settings
+    async updateSettings(settingName, settingValue, category = 'Config') {
+        try {
+            const response = await fetch(this.WEB_APP_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'updateSettings',
+                    setting_name: settingName,
+                    setting_value: settingValue,
+                    category: category
+                })
+            });
+            
+            return await response.json();
+        } catch (error) {
+            console.error('Error updating settings:', error);
+            return { success: false, error: error.message };
         }
     }
 }
