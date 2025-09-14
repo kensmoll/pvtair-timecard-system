@@ -827,4 +827,139 @@
                 showAlert('Error submitting timecard: ' + error.message, 'info');
             } finally {
                 // Re-enable submit button
-                submitBtn.disabled = false
+                submitBtn.disabled = false;
+                submitBtn.textContent = '💾 Submit Timecard';
+            }
+        }
+        
+        function clearTimecard() {
+            if (confirm('Are you sure you want to clear all entries for this week?')) {
+                const weekKey = getWeekKey(currentWeekStart);
+                timecardData[currentEmployee.id][weekKey] = {};
+                initializeTimecard();
+                generateTimecardGrid();
+                updateSummary();
+                showAlert('All entries cleared.', 'info');
+            }
+        }
+        
+        async function saveAsDraft() {
+            const weekKey = getWeekKey(currentWeekStart);
+            const weekData = timecardData[currentEmployee.id][weekKey];
+            
+            // Disable draft button during save
+            const draftBtn = document.getElementById('draftBtn');
+            draftBtn.disabled = true;
+            draftBtn.textContent = '⏳ Saving...';
+            
+            try {
+                showAlert('Saving draft...', 'info');
+                let savedDays = 0;
+                
+                for (const [dateKey, dayData] of Object.entries(weekData)) {
+                    // Save days that have data as draft
+                    if (Object.values(dayData).some(value => parseFloat(value) > 0)) {
+                        const result = await database.saveTimecard(
+                            currentEmployee.id,
+                            dateKey,
+                            {
+                                revFlight: parseFloat(dayData.revFlight) || 0,
+                                nonRevFlightExc: parseFloat(dayData.nonRevFlight) || 0,
+                                nonRevNonFlight: parseFloat(dayData.nonRevNonFlight) || 0,
+                                mx: parseFloat(dayData.mx) || 0,
+                                admin: parseFloat(dayData.admin) || 0
+                            },
+                            'Draft'
+                        );
+                        
+                        if (result.success) {
+                            savedDays++;
+                        }
+                    }
+                }
+                
+                if (savedDays > 0) {
+                    showAlert(`Draft saved! ${savedDays} days saved. You can continue editing later.`, 'success');
+                } else {
+                    showAlert('No data to save as draft.', 'info');
+                }
+                
+            } catch (error) {
+                console.error('Error saving draft:', error);
+                showAlert('Error saving draft: ' + error.message, 'info');
+            } finally {
+                // Re-enable draft button
+                draftBtn.disabled = false;
+                draftBtn.textContent = '📝 Save as Draft';
+            }
+        }
+        
+        function showAlert(message, type) {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const content = document.querySelector('.content');
+            content.insertBefore(alertDiv, content.firstChild);
+            
+            // Auto-remove success/info alerts after 5 seconds
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 5000);
+            }
+        }
+        
+        // Auto-save functionality (enhanced)
+        setInterval(async () => {
+            if (currentEmployee) {
+                const weekKey = getWeekKey(currentWeekStart);
+                const weekData = timecardData[currentEmployee.id][weekKey];
+                
+                // Check if there's unsaved data
+                let hasUnsavedData = false;
+                for (const [dateKey, dayData] of Object.entries(weekData)) {
+                    if (Object.values(dayData).some(value => parseFloat(value) > 0)) {
+                        hasUnsavedData = true;
+                        break;
+                    }
+                }
+                
+                if (hasUnsavedData) {
+                    console.log('Auto-saving timecard data...');
+                    // Could implement auto-draft saving here if desired
+                }
+            }
+        }, 60000); // Auto-save every 60 seconds
+        
+        // Handle page refresh/close with unsaved data warning
+        window.addEventListener('beforeunload', function(e) {
+            if (currentEmployee) {
+                const weekKey = getWeekKey(currentWeekStart);
+                const weekData = timecardData[currentEmployee.id][weekKey];
+                
+                // Check if there's unsaved data
+                let hasUnsavedData = false;
+                for (const [dateKey, dayData] of Object.entries(weekData)) {
+                    if (Object.values(dayData).some(value => parseFloat(value) > 0)) {
+                        hasUnsavedData = true;
+                        break;
+                    }
+                }
+                
+                if (hasUnsavedData) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved timecard data. Are you sure you want to leave?';
+                    return e.returnValue;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
