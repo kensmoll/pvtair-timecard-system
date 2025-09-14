@@ -1,0 +1,9 @@
+/admin               /admin/index.html           200
+/timecard            /timecard/index.html        200
+/reports             /reports/index.html         200
+
+# Employee direct access
+/timecard/*          /timecard/index.html        200
+
+# Fallback for SPA
+/*                   /index.html                 200
