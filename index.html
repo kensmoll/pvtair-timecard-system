@@ -174,7 +174,7 @@
         // Database configuration
         class TimecardDatabase {
             constructor() {
-                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbyW965NnW8ydY_w0AofugyS7PBkq-OPlEMJpEpOIvOG99McyRj1eLXrXOcGh6xus0Fk/exec';
+                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbwYbyF4Vb_inmApCbYaa4itYoIITQGrjetWy4892ApR9tuP_81alu76Vpq2XiIgnmhB/exec';
             }
 
             async makeRequest(url, options = {}) {
@@ -220,19 +220,37 @@
             async saveTimecard(data) {
                 try {
                     console.log('Saving timecard data:', data);
-                    const result = await this.makeRequest(this.scriptUrl, {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ action: 'saveTimecard', data: data })
-                    });
-                    console.log('Save response:', result);
+                    
+                    // Try GET method first for saves (more reliable)
+                    const params = new URLSearchParams();
+                    params.append('action', 'saveTimecard');
+                    params.append('data', JSON.stringify(data));
+                    
+                    const getUrl = `${this.scriptUrl}?${params.toString()}`;
+                    console.log('Trying GET save to:', getUrl);
+                    
+                    const result = await this.makeRequest(getUrl);
+                    console.log('GET Save response:', result);
                     return result;
                 } catch (error) {
-                    console.error('Error saving timecard:', error);
-                    throw new Error('Failed to save timecard: ' + error.message);
+                    console.error('GET save failed, trying POST...', error);
+                    
+                    // Fallback to POST
+                    try {
+                        const result = await this.makeRequest(this.scriptUrl, {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ action: 'saveTimecard', data: data })
+                        });
+                        console.log('POST Save response:', result);
+                        return result;
+                    } catch (postError) {
+                        console.error('Both GET and POST save failed:', postError);
+                        throw new Error('Failed to save timecard: ' + postError.message);
+                    }
                 }
             }
 
@@ -878,32 +896,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Debug function to test calculations
-        function debugCalculations() {
-            console.log('Current Employee:', currentEmployee);
-            console.log('Pay Categories:', payCategories);
-            
-            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            days.forEach(day => {
-                payCategories.forEach(category => {
-                    if (category.type === 'radio') {
-                        const selected = document.querySelector(`input[name="${day}_${category.id}"]:checked`);
-                        console.log(`${day} ${category.id}:`, selected ? selected.value : 'none selected');
-                    } else {
-                        const input = document.getElementById(`${day}_${category.id}`);
-                        console.log(`${day} ${category.id}:`, input ? input.value : 'input not found');
-                    }
-                });
-            });
-        }
-
-        // Add global error handler
-        window.addEventListener('error', function(e) {
-            console.error('Global error:', e.error);
-            showError('An unexpected error occurred: ' + e.message);
-        });
-
-        // Test function for database connection
+        // Debug function to test database connection
         async function testDatabaseConnection() {
             try {
                 console.log('Testing database connection...');
@@ -913,6 +906,56 @@
             } catch (error) {
                 console.error('Database test failed:', error);
                 return false;
+            }
+        }
+
+        // Debug function to test POST requests
+        async function testPostRequest() {
+            try {
+                console.log('Testing POST request...');
+                const testData = {
+                    employee_id: 'test',
+                    employee_name: 'Test Employee',
+                    week_starting: '2025-01-13',
+                    status: 'test',
+                    total_hours: 0,
+                    total_pay: 0
+                };
+                
+                const result = await database.saveTimecard(testData);
+                console.log('POST test result:', result);
+                return result;
+            } catch (error) {
+                console.error('POST test failed:', error);
+                throw error;
+            }
+        }
+
+        // Test using GET method for saves (fallback)
+        async function testGetSave() {
+            try {
+                console.log('Testing GET save method...');
+                const testData = {
+                    employee_id: 'test',
+                    employee_name: 'Test Employee',
+                    week_starting: '2025-01-13',
+                    status: 'test'
+                };
+                
+                const params = new URLSearchParams();
+                params.append('action', 'saveTimecard');
+                params.append('data', JSON.stringify(testData));
+                
+                const url = `${database.scriptUrl}?${params.toString()}`;
+                console.log('GET URL:', url);
+                
+                const response = await fetch(url);
+                const result = await response.json();
+                console.log('GET save result:', result);
+                return result;
+            } catch (error) {
+                console.error('GET save test failed:', error);
+                throw error;
             }
         }
 
@@ -933,8 +976,26 @@
         }
 
         // Make functions available globally for debugging
-        window.debugCalculations = debugCalculations;
+        window.debugCalculations = function() {
+            console.log('Current Employee:', currentEmployee);
+            console.log('Pay Categories:', payCategories);
+            
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            days.forEach(day => {
+                payCategories.forEach(category => {
+                    if (category.type === 'radio') {
+                        const selected = document.querySelector(`input[name="${day}_${category.id}"]:checked`);
+                        console.log(`${day} ${category.id}:`, selected ? selected.value : 'none selected');
+                    } else {
+                        const input = document.getElementById(`${day}_${category.id}`);
+                        console.log(`${day} ${category.id}:`, input ? input.value : 'input not found');
+                    }
+                });
+            });
+        };
         window.testDatabaseConnection = testDatabaseConnection;
+        window.testPostRequest = testPostRequest;
+        window.testGetSave = testGetSave;
         window.calculateTotals = calculateTotals;
     </script>
 </body>
