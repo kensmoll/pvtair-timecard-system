@@ -584,12 +584,29 @@ setInterval(async () => {
             await database.testConnection();
             database.isConnected = true;
             console.log('✅ Database connection restored');
+            
+            // Dispatch reconnection event
+            window.dispatchEvent(new CustomEvent('databaseReconnected', {
+                detail: { database: database }
+            }));
+            
         } catch (error) {
             database.isConnected = false;
             console.error('❌ Database connection still unhealthy:', error);
+            
+            // Dispatch connection error event
+            window.dispatchEvent(new CustomEvent('databaseConnectionError', {
+                detail: { error: error.message }
+            }));
         }
     }
 }, 5 * 60 * 1000);
+
+// Auto-clear cache every 30 minutes to ensure fresh data
+setInterval(() => {
+    console.log('🧹 Auto-clearing cache for fresh data');
+    database.clearCache();
+}, 30 * 60 * 1000);
 
 // Export database for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
@@ -600,4 +617,41 @@ if (typeof module !== 'undefined' && module.exports) {
 window.database = database;
 window.PVTAIRDatabase = PVTAIRDatabase;
 
+// Add global error handler for unhandled promise rejections
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('❌ Unhandled promise rejection in database:', event.reason);
+    
+    // Dispatch global error event
+    window.dispatchEvent(new CustomEvent('databaseUnhandledError', {
+        detail: { error: event.reason }
+    }));
+});
+
+// Utility functions for debugging
+window.debugDatabase = {
+    getConfig: () => database.getConfig(),
+    clearCache: () => database.clearCache(),
+    reconnect: () => database.reconnect(),
+    testConnection: () => database.testConnection(),
+    isHealthy: () => database.isConnectionHealthy()
+};
+
 console.log('📦 PVTAIR Database module loaded successfully');
+console.log('🔧 Debug tools available via window.debugDatabase');
+
+/**
+ * Usage Examples:
+ * 
+ * // Basic usage
+ * const employees = await database.getEmployees();
+ * const result = await database.submitTimecard(data);
+ * 
+ * // Listen for events
+ * window.addEventListener('databaseReady', () => console.log('DB Ready!'));
+ * window.addEventListener('databaseError', () => console.log('DB Error!'));
+ * 
+ * // Debug tools
+ * window.debugDatabase.getConfig(); // Check configuration
+ * window.debugDatabase.clearCache(); // Clear all cached data
+ * window.debugDatabase.reconnect(); // Force reconnection
+ */
