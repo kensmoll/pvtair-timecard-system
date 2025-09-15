@@ -212,8 +212,8 @@
             constructor() {
                 this.apiKey = 'AIzaSyC5jWKcsb5LyYFHmGtOEEIAT6tIt0hPZs8';
                 this.spreadsheetId = '1Jo39kWkJcNF-LEymNXmL8PgjipoEDvByyeI71YiElIs';
-                this.deploymentId = 'AKfycbxf6AZI5D3oAmzifNudufYI4qchUFDHTCZ6jVRmCx4T11oFKXFnr44SGDBOc2MmYOMj';
-                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbxf6AZI5D3oAmzifNudufYI4qchUFDHTCZ6jVRmCx4T11oFKXFnr44SGDBOc2MmYOMj/exec';
+                this.deploymentId = 'AKfycbwYbyF4Vb_inmApCbYaa4itYoIITQGrjetWy4892ApR9tuP_81alu76Vpq2XiIgnmhB';
+                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbwYbyF4Vb_inmApCbYaa4itYoIITQGrjetWy4892ApR9tuP_81alu76Vpq2XiIgnmhB/exec';
             }
 
             async getEmployees() {
@@ -305,13 +305,13 @@
             let ratesHTML = '';
             
             if (currentEmployee.base_salary && parseFloat(currentEmployee.base_salary) > 0) {
-                ratesHTML += `Base Salary: $${parseFloat(currentEmployee.base_salary).toLocaleString()}/year<br>`;
+                ratesHTML += `Base Salary: ${parseFloat(currentEmployee.base_salary).toLocaleString()}/year<br>`;
             }
             
             payCategories.forEach(category => {
                 const rate = currentEmployee[category.rateField];
                 if (rate && parseFloat(rate) > 0) {
-                    ratesHTML += `${category.label}: $${parseFloat(rate).toFixed(2)}/hour<br>`;
+                    ratesHTML += `${category.label}: ${parseFloat(rate).toFixed(2)}/hour<br>`;
                 }
             });
             
