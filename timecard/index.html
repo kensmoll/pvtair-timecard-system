@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PVTAIR - Employee Timecard</title>
+    <title>PVTAIR - Timecard Submission</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px);
@@ -32,64 +32,65 @@
         .header {
             background: linear-gradient(135deg, #1A1A1A 0%, #333333 50%, #4A4A4A 100%);
             color: white;
-            padding: 20px 25px;
+            padding: 25px 30px;
             text-align: center;
             position: relative;
         }
         
         .company-name {
             color: #A8A8A8;
-            font-size: 2.2em;
+            font-size: 2.5em;
             font-weight: 300;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
-            letter-spacing: 4px;
+            letter-spacing: 5px;
             font-family: 'Arial', sans-serif;
         }
         
-        .employee-name {
-            font-size: 1.8em;
-            margin-bottom: 5px;
+        .page-title {
+            font-size: 2em;
+            margin-bottom: 8px;
             font-weight: 600;
             color: white;
         }
         
-        .timecard-date {
-            font-size: 1.1em;
+        .page-subtitle {
+            font-size: 1.2em;
             opacity: 0.9;
             color: #CCCCCC;
         }
         
         .content {
-            padding: 25px;
+            padding: 30px;
             background: linear-gradient(135deg, #FAFAFA, #F8FAFC);
         }
         
         .employee-selector {
             background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
             border: 2px solid #A5B4FC;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
             text-align: center;
         }
         
         .employee-selector h3 {
             color: #3730A3;
             margin-bottom: 15px;
+            font-size: 1.4em;
         }
         
         .employee-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
         
         .employee-card {
             background: white;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 12px;
             border: 2px solid #E5E5E5;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -98,13 +99,32 @@
         
         .employee-card:hover {
             border-color: #7C3AED;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.2);
         }
         
         .employee-card.selected {
             border-color: #7C3AED;
             background: linear-gradient(135deg, #F3E8FF, #E9D5FF);
+        }
+        
+        .employee-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .employee-role {
+            color: #6b7280;
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+        
+        .employee-id {
+            color: #9ca3af;
+            font-size: 0.9em;
+            font-family: monospace;
         }
         
         .timecard-form {
@@ -121,260 +141,263 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .week-navigation {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding: 15px;
+        .form-header {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .week-nav-btn {
-            background: linear-gradient(135deg, #1A1A1A, #333333);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .week-nav-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .week-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .current-week {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .timecard-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-        
-        .day-column {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-            border: 2px solid #E5E5E5;
-            transition: all 0.3s ease;
-        }
-        
-        .day-column:hover {
-            border-color: #A8A8A8;
-            transform: translateY(-2px);
-        }
-        
-        .day-header {
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             text-align: center;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #E5E5E5;
         }
         
-        .day-date {
-            font-size: 0.9em;
-            color: #666;
+        .form-title {
+            font-size: 1.6em;
+            font-weight: 600;
+            color: #1f2937;
             margin-bottom: 8px;
         }
         
-        .category-input {
-            margin-bottom: 12px;
+        .form-subtitle {
+            color: #6b7280;
+            font-size: 1.1em;
         }
         
-        .category-label {
+        .form-sections {
+            display: grid;
+            gap: 30px;
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            font-size: 0.85em;
+        }
+        
+        .section-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-label {
             font-weight: 600;
-            color: #1E293B;
-            margin-bottom: 5px;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 0.95em;
         }
         
-        .tooltip-icon {
-            width: 16px;
-            height: 16px;
-            background: #7C3AED;
-            color: white;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            margin-left: 5px;
-            cursor: help;
-            position: relative;
-        }
-        
-        .tooltip-icon:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 11px;
-            white-space: pre-wrap;
-            z-index: 1000;
-            max-width: 200px;
-            line-height: 1.3;
-        }
-        
-        .category-input input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #DDD;
-            border-radius: 6px;
-            font-size: 14px;
+        .form-input {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
             transition: all 0.3s ease;
+            background: #fafafa;
         }
         
-        .category-input input:focus {
+        .form-input:focus {
             outline: none;
-            border-color: #7C3AED;
+            border-color: #7c3aed;
+            background: white;
             box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
         }
         
-        .daily-total {
-            text-align: center;
-            font-weight: bold;
-            color: #333;
-            background: linear-gradient(135deg, #F0F9FF, #E0F2FE);
-            padding: 8px;
-            border-radius: 6px;
-            margin-top: 10px;
-            border: 1px solid #BAE6FD;
+        .form-input:required {
+            border-left: 4px solid #7c3aed;
         }
         
-        .submit-section {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-            text-align: center;
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
         }
         
-        .weekly-summary {
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .break-section {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .break-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 15px;
+        }
+        
+        .hours-summary {
+            background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
+            border: 2px solid #BBF7D0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .summary-title {
+            font-weight: 600;
+            color: #166534;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .summary-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
-            margin-bottom: 25px;
         }
         
         .summary-item {
-            background: linear-gradient(135deg, #F8FAFC, #F1F5F9);
+            background: white;
             padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #E2E8F0;
+            border-radius: 8px;
             text-align: center;
-        }
-        
-        .summary-label {
-            font-size: 0.9em;
-            color: #64748B;
-            margin-bottom: 5px;
+            border: 1px solid #BBF7D0;
         }
         
         .summary-value {
-            font-size: 1.3em;
+            font-size: 1.4em;
             font-weight: bold;
-            color: #1E293B;
+            color: #166534;
+            margin-bottom: 5px;
         }
         
-        .estimated-pay {
-            background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
-            border-color: #6EE7B7;
+        .summary-label {
+            color: #16a34a;
+            font-size: 0.9em;
         }
         
-        .estimated-pay .summary-value {
-            color: #065F46;
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
         }
         
         .btn {
-            background: linear-gradient(135deg, #1A1A1A, #333333);
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
             color: white;
             border: none;
-            padding: 16px 32px;
-            border-radius: 12px;
-            font-size: 16px;
+            padding: 15px 30px;
+            border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 5px;
+            font-size: 16px;
+            min-width: 150px;
         }
         
         .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
         }
         
         .btn:disabled {
-            opacity: 0.5;
+            background: #9ca3af;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
         }
         
         .btn-success {
-            background: linear-gradient(135deg, #059669, #10B981);
+            background: linear-gradient(135deg, #059669, #047857);
         }
         
-        .btn-success:hover {
-            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
+        .btn-warning {
+            background: linear-gradient(135deg, #d97706, #b45309);
         }
         
-        .btn-danger {
-            background: linear-gradient(135deg, #DC2626, #B91C1C);
+        .my-timecards {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
         }
         
-        .btn-danger:hover {
-            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+        .timecards-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 20px;
+            text-align: center;
         }
         
-        .alert {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-weight: 500;
+        .timecards-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
         }
         
-        .alert-success {
-            background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
-            color: #065F46;
-            border: 2px solid #A7F3D0;
+        .timecards-table th,
+        .timecards-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
         }
         
-        .alert-info {
-            background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
-            color: #1E40AF;
-            border: 2px solid #BFDBFE;
+        .timecards-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
         }
         
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
+        .timecards-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
         }
         
         .loading-message {
@@ -397,27 +420,91 @@
             color: #991b1b;
         }
         
+        .success-message {
+            background: #f0fdf4;
+            border: 2px solid #bbf7d0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            color: #166534;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+            color: #065F46;
+            border: 2px solid #A7F3D0;
+        }
+        
+        .alert-error {
+            background: linear-gradient(135deg, #FEF2F2, #FECACA);
+            color: #991B1B;
+            border: 2px solid #FECACA;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+            color: #1E40AF;
+            border: 2px solid #BFDBFE;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+            color: #92400E;
+            border: 2px solid #FDE68A;
+        }
+        
+        .back-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            text-decoration: none;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
         @media (max-width: 768px) {
-            .timecard-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
             .employee-grid {
                 grid-template-columns: 1fr;
             }
             
-            .week-navigation {
-                flex-direction: column;
-                gap: 10px;
+            .form-grid {
+                grid-template-columns: 1fr;
             }
             
-            .weekly-summary {
+            .time-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
             
+            .form-actions {
+                flex-direction: column;
+            }
+            
             .company-name {
-                font-size: 1.8em;
+                font-size: 2em;
             }
             
             .container {
@@ -427,12 +514,16 @@
         }
         
         @media (max-width: 480px) {
-            .weekly-summary {
+            .summary-grid {
                 grid-template-columns: 1fr;
             }
             
             .content {
-                padding: 15px;
+                padding: 20px;
+            }
+            
+            .timecards-table {
+                font-size: 12px;
             }
         }
     </style>
@@ -441,136 +532,240 @@
     <div class="container">
         <div class="header">
             <div class="company-name">PVTAIR</div>
-            <div class="employee-name" id="employeeName">Select Employee</div>
-            <div class="timecard-date" id="timecardDate">Weekly Timecard Entry</div>
+            <div class="page-title">Timecard Submission</div>
+            <div class="page-subtitle">Submit your daily work hours and activities</div>
         </div>
         
         <div class="content">
             <!-- Employee Selection -->
             <div class="employee-selector" id="employeeSelector">
-                <h3>Select Your Name to Access Timecard</h3>
+                <h3>Select Your Employee Profile</h3>
                 <p style="color: #6B7280; margin-bottom: 15px;">
-                    Click on your name below to load your timecard for the current week.
+                    Choose your name below to access timecard submission and view your timecard history.
                 </p>
                 <div class="employee-grid" id="employeeGrid">
-                    <div class="loading-message">Loading employees from database...</div>
+                    <div class="loading-message">Loading employees from Google Sheets...</div>
                 </div>
             </div>
             
-            <!-- Timecard Form -->
+            <!-- Timecard Submission Form -->
             <div class="timecard-form" id="timecardForm">
-                <!-- Week Navigation -->
-                <div class="week-navigation">
-                    <button class="week-nav-btn" onclick="navigateWeek(-1)">◀ Previous Week</button>
-                    <div class="current-week" id="currentWeek">Week of [Date]</div>
-                    <button class="week-nav-btn" onclick="navigateWeek(1)" id="nextWeekBtn">Next Week ▶</button>
+                <div class="form-header">
+                    <div class="form-title" id="formTitle">Submit Timecard</div>
+                    <div class="form-subtitle" id="formSubtitle">Enter your work hours and activities</div>
                 </div>
                 
-                <!-- Timecard Grid -->
-                <div class="timecard-grid" id="timecardGrid">
-                    <!-- Daily columns will be generated here -->
-                </div>
-                
-                <!-- Submit Section -->
-                <div class="submit-section">
-                    <div class="weekly-summary" id="weeklySummary">
-                        <!-- Summary items will be generated here -->
+                <form id="timecardSubmissionForm" class="form-sections">
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <span class="section-icon">📅</span>
+                            Basic Information
+                        </h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Work Date *</label>
+                                <input type="date" id="workDate" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Project/Location</label>
+                                <input type="text" id="projectLocation" class="form-input" placeholder="Enter project or work location">
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div style="border-top: 2px solid #E5E5E5; padding-top: 20px;">
-                        <button class="btn btn-success" onclick="submitTimecard()" id="submitBtn">💾 Submit Timecard</button>
-                        <button class="btn btn-danger" onclick="clearTimecard()">🗑️ Clear All Entries</button>
-                        <button class="btn" onclick="saveAsDraft()" id="draftBtn">📝 Save as Draft</button>
+
+                    <!-- Time Information -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <span class="section-icon">⏰</span>
+                            Time Information
+                        </h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Start Time *</label>
+                                <input type="time" id="startTime" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">End Time *</label>
+                                <input type="time" id="endTime" class="form-input" required>
+                            </div>
+                        </div>
+                        
+                        <div class="break-section">
+                            <div class="break-title">Break Information</div>
+                            <div class="time-inputs">
+                                <div class="form-group">
+                                    <label class="form-label">Break Start</label>
+                                    <input type="time" id="breakStart" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Break End</label>
+                                    <input type="time" id="breakEnd" class="form-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hours-summary" id="hoursSummary">
+                            <div class="summary-title">Hours Summary</div>
+                            <div class="summary-grid">
+                                <div class="summary-item">
+                                    <div class="summary-value" id="totalHours">0.0</div>
+                                    <div class="summary-label">Total Hours</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-value" id="regularHours">0.0</div>
+                                    <div class="summary-label">Regular Hours</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-value" id="overtimeHours">0.0</div>
+                                    <div class="summary-label">Overtime Hours</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-value" id="breakHours">0.0</div>
+                                    <div class="summary-label">Break Time</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Work Description -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <span class="section-icon">📝</span>
+                            Work Description
+                        </h3>
+                        <div class="form-group">
+                            <label class="form-label">Work Activities *</label>
+                            <textarea id="workActivities" class="form-input form-textarea" 
+                                      placeholder="Describe the work performed, tasks completed, and any notable activities..."
+                                      required></textarea>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Equipment Used</label>
+                                <input type="text" id="equipmentUsed" class="form-input" 
+                                       placeholder="List equipment, tools, or vehicles used">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Safety Notes</label>
+                                <input type="text" id="safetyNotes" class="form-input" 
+                                       placeholder="Any safety incidents or observations">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Actions -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="saveAsDraft()">
+                            💾 Save as Draft
+                        </button>
+                        <button type="button" class="btn btn-warning" onclick="clearForm()">
+                            🗑️ Clear Form
+                        </button>
+                        <button type="submit" class="btn">
+                            ✅ Submit Timecard
+                        </button>
+                    </div>
+                </form>
+
+                <!-- My Timecards -->
+                <div class="my-timecards">
+                    <h3 class="timecards-title">📋 My Recent Timecards</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="timecards-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Hours</th>
+                                    <th>Project/Location</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="myTimecardsBody">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; color: #6b7280;">Loading your timecards...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <a href="../" class="back-button">← Back to Dashboard</a>
+
+    <script src="../assets/js/database.js"></script>
     <script>
-        // Global variables - NO HARDCODED EMPLOYEE DATA
-        let employees = []; // This will be populated from Google Sheets ONLY
-        let categories = {
-            revFlight: {
-                name: 'Rev Flight',
-                tooltip: 'Revenue Flight: Revenue-generating charter flights with passengers or cargo',
-                type: 'daily'
-            },
-            nonRevFlight: {
-                name: 'Non Rev Flight/EXC',
-                tooltip: 'Non-Revenue Flight/EXC: Positioning flights, maintenance flights, or training flights',
-                type: 'daily'
-            },
-            nonRevNonFlight: {
-                name: 'Non Rev/Non Flight',
-                tooltip: 'Non-Revenue/Non-Flight: Ground duties like flight planning, briefings, standby time',
-                type: 'daily'
-            },
-            mx: {
-                name: 'MX',
-                tooltip: 'Maintenance (MX): Aircraft maintenance, inspections, or maintenance supervision',
-                type: 'hourly'
-            },
-            admin: {
-                name: 'Admin',
-                tooltip: 'Administrative: Office work, paperwork, meetings, training sessions',
-                type: 'hourly'
-            }
-        };
-        
+        // Global variables
+        let employees = [];
         let currentEmployee = null;
-        let currentWeekStart = new Date();
-        let timecardData = {};
+        let myTimecards = [];
         
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Timecard page loaded, initializing...');
-            initializeWeek();
-            loadEmployeesFromDatabase();
+            console.log('Timecard submission page loaded, initializing...');
+            loadEmployeesFromGoogleSheets();
+            setupFormEventListeners();
+            setDefaultDate();
             
-            // Check if employee ID is in URL (for direct links)
+            // Check if employee ID is in URL
             const urlParams = new URLSearchParams(window.location.search);
             const employeeId = urlParams.get('employee');
             if (employeeId) {
-                // Wait for employees to load, then select
-                setTimeout(() => selectEmployee(employeeId), 2000);
+                setTimeout(() => selectEmployee(employeeId), 1000);
             }
         });
-        
-        // Load employees from Google Sheets via database
-        async function loadEmployeesFromDatabase() {
-            console.log('Loading employees from database...');
+
+        // Set default work date to today
+        function setDefaultDate() {
+            const today = new Date();
+            document.getElementById('workDate').value = today.toISOString().split('T')[0];
+        }
+
+        // Setup form event listeners
+        function setupFormEventListeners() {
+            // Time calculation on input change
+            const timeInputs = ['startTime', 'endTime', 'breakStart', 'breakEnd'];
+            timeInputs.forEach(inputId => {
+                document.getElementById(inputId).addEventListener('change', calculateHours);
+            });
+
+            // Form submission
+            document.getElementById('timecardSubmissionForm').addEventListener('submit', handleFormSubmission);
+        }
+
+        // Load employees from Google Sheets ONLY
+        async function loadEmployeesFromGoogleSheets() {
+            console.log('Loading employees from Google Sheets...');
             
             try {
-                // Wait for database to be ready
-                if (typeof database === 'undefined') {
-                    console.log('Database not ready, waiting...');
-                    setTimeout(loadEmployeesFromDatabase, 1000);
+                employees = await database.getEmployees();
+                
+                if (!employees || employees.length === 0) {
+                    showErrorMessage('No employees found in Google Sheets. Please check your spreadsheet.');
                     return;
                 }
                 
-                // Get employees from Google Sheets
-                employees = await database.getEmployees();
                 console.log(`Successfully loaded ${employees.length} employees from Google Sheets`);
-                
-                // Generate the employee selection grid
                 generateEmployeeGrid();
                 
             } catch (error) {
-                console.error('Error loading employees from database:', error);
-                showErrorMessage('Failed to load employees. Please check your connection and refresh the page.');
+                console.error('Error loading employees from Google Sheets:', error);
+                showErrorMessage('Failed to connect to Google Sheets. Please check your internet connection and try again.');
             }
         }
-        
+
+        // Generate employee selection grid
         function generateEmployeeGrid() {
             const grid = document.getElementById('employeeGrid');
             
             if (!employees || employees.length === 0) {
-                grid.innerHTML = '<div class="error-message">No employees found in database. Please check your Google Sheets configuration.</div>';
+                grid.innerHTML = '<div class="error-message">No employees found in Google Sheets.</div>';
                 return;
             }
-            
-            console.log('Generating employee grid with', employees.length, 'employees');
             
             // Create employee cards from Google Sheets data
             grid.innerHTML = employees.map(employee => {
@@ -581,255 +776,455 @@
                 
                 return `
                     <div class="employee-card" onclick="selectEmployee('${employee.id}')">
-                        <strong>${employee.name}</strong>
-                        <div style="font-size: 0.9em; color: #666; margin-top: 5px;">
-                            ID: ${employee.id}
-                        </div>
+                        <div class="employee-name">${employee.name}</div>
+                        <div class="employee-role">${employee.role || 'Employee'}</div>
+                        <div class="employee-id">ID: ${employee.id}</div>
                     </div>
                 `;
             }).filter(card => card !== '').join('');
             
-            console.log('Employee grid generated successfully');
+            console.log('Employee grid generated from Google Sheets data');
         }
-        
+
+        // Select employee and show timecard form
         function selectEmployee(employeeId) {
             console.log('Selecting employee:', employeeId);
             
             currentEmployee = employees.find(emp => emp.id === employeeId);
             if (!currentEmployee) {
-                showAlert('Employee not found. Please try again.', 'info');
-                console.error('Employee not found:', employeeId);
+                showAlert('Employee not found in Google Sheets data.', 'error');
                 return;
             }
             
             console.log('Selected employee:', currentEmployee.name);
             
-            // Update header
-            document.getElementById('employeeName').textContent = currentEmployee.name;
+            // Update form header
+            document.getElementById('formTitle').textContent = `${currentEmployee.name} - Submit Timecard`;
+            document.getElementById('formSubtitle').textContent = `Employee ID: ${currentEmployee.id}`;
             
             // Hide employee selector, show timecard form
             document.getElementById('employeeSelector').style.display = 'none';
             document.getElementById('timecardForm').classList.add('active');
             
-            // Initialize timecard
-            initializeTimecard();
-            updateWeekDisplay();
-            generateTimecardGrid();
-            updateSummary();
+            // Load employee's timecards
+            loadMyTimecards();
             
             // Update URL for direct access
             const newUrl = new URL(window.location);
             newUrl.searchParams.set('employee', employeeId);
             window.history.pushState({}, '', newUrl);
         }
-        
-        function initializeWeek() {
-            // Set to start of current week (Monday)
-            const today = new Date();
-            const dayOfWeek = today.getDay();
-            const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-            currentWeekStart = new Date(today);
-            currentWeekStart.setDate(today.getDate() + daysToMonday);
-            currentWeekStart.setHours(0, 0, 0, 0);
-        }
-        
-        function initializeTimecard() {
-            const weekKey = getWeekKey(currentWeekStart);
-            if (!timecardData[currentEmployee.id]) {
-                timecardData[currentEmployee.id] = {};
-            }
-            if (!timecardData[currentEmployee.id][weekKey]) {
-                timecardData[currentEmployee.id][weekKey] = {};
-                // Initialize empty data for the week
-                for (let i = 0; i < 7; i++) {
-                    const date = new Date(currentWeekStart);
-                    date.setDate(currentWeekStart.getDate() + i);
-                    const dateKey = date.toISOString().split('T')[0];
-                    timecardData[currentEmployee.id][weekKey][dateKey] = {};
-                    Object.keys(categories).forEach(category => {
-                        timecardData[currentEmployee.id][weekKey][dateKey][category] = '';
-                    });
-                }
-            }
-        }
-        
-        function getWeekKey(weekStart) {
-            return weekStart.toISOString().split('T')[0];
-        }
-        
-        function updateWeekDisplay() {
-            const weekEnd = new Date(currentWeekStart);
-            weekEnd.setDate(currentWeekStart.getDate() + 6);
-            
-            const formatDate = (date) => {
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            };
-            
-            document.getElementById('currentWeek').textContent = 
-                `Week of ${formatDate(currentWeekStart)} - ${formatDate(weekEnd)}`;
-            
-            document.getElementById('timecardDate').textContent = 
-                `Weekly Timecard: ${formatDate(currentWeekStart)} - ${formatDate(weekEnd)}`;
-            
-            // Disable next week button if it's future
-            const nextWeek = new Date(currentWeekStart);
-            nextWeek.setDate(currentWeekStart.getDate() + 7);
-            const today = new Date();
-            document.getElementById('nextWeekBtn').disabled = nextWeek > today;
-        }
-        
-        // Check if a category should be shown for an employee (hide if rate is 0 or missing)
-        function shouldShowCategory(categoryKey, employee) {
-            if (!employee || !employee.rates) {
-                return false;
-            }
-            
-            // Map category keys to rate property names
-            const rateMapping = {
-                'revFlight': 'revFlight',
-                'nonRevFlight': 'nonRevFlightExc', 
-                'nonRevNonFlight': 'nonRevNonFlight',
-                'mx': 'mxHourly',
-                'admin': 'adminHourly'
-            };
-            
-            const rateProperty = rateMapping[categoryKey];
-            if (!rateProperty) {
-                return false;
-            }
-            
-            const rate = employee.rates[rateProperty];
-            
-            // Hide if rate is 0, null, undefined, or empty string
-            return rate != null && rate !== '' && parseFloat(rate) > 0;
-        }
-        
-        function generateTimecardGrid() {
-            const grid = document.getElementById('timecardGrid');
-            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-            const weekKey = getWeekKey(currentWeekStart);
-            
-            grid.innerHTML = days.map((day, index) => {
-                const date = new Date(currentWeekStart);
-                date.setDate(currentWeekStart.getDate() + index);
-                const dateKey = date.toISOString().split('T')[0];
-                const dayData = timecardData[currentEmployee.id][weekKey][dateKey] || {};
-                
-                return `
-                    <div class="day-column">
-                        <div class="day-header">${day}</div>
-                        <div class="day-date">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-                        
-                        ${Object.entries(categories).map(([categoryKey, category]) => {
-                            // Skip category if employee doesn't have this rate or rate is zero
-                            if (!shouldShowCategory(categoryKey, currentEmployee)) {
-                                return '';
-                            }
-                            
-                            const step = categoryKey === 'revFlight' ? '1' : '0.5';
-                            const placeholder = categoryKey === 'revFlight' ? 'Full days only' : '0';
-                            
-                            return `
-                                <div class="category-input">
-                                    <div class="category-label">
-                                        ${category.name}
-                                        <span class="tooltip-icon" data-tooltip="${category.tooltip}">?</span>
-                                    </div>
-                                    <input 
-                                        type="number" 
-                                        step="${step}" 
-                                        min="0" 
-                                        max="24"
-                                        placeholder="${placeholder}"
-                                        value="${dayData[categoryKey] || ''}"
-                                        onchange="updateTimecard('${dateKey}', '${categoryKey}', this.value)"
-                                        oninput="updateSummary()"
-                                        ${categoryKey === 'revFlight' ? 'onblur="validateRevenueFlight(this, \'' + dateKey + '\')"' : ''}
-                                    >
-                                </div>
-                            `;
-                        }).filter(html => html !== '').join('')}
-                        
-                        <div class="daily-total" id="total-${dateKey}">
-                            Total: 0.0 hrs
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            updateDailyTotals();
-        }
-        
-        function validateRevenueFlight(input, dateKey) {
-            const value = parseFloat(input.value);
-            if (value && value % 1 !== 0) {
-                const rounded = Math.round(value);
-                input.value = rounded;
-                showAlert('Revenue Flights must be in full day increments. Rounded to ' + rounded + ' day(s).', 'info');
-                updateTimecard(dateKey, 'revFlight', rounded.toString());
-            }
-        }
-        
-        function updateTimecard(dateKey, category, value) {
-            const weekKey = getWeekKey(currentWeekStart);
-            if (!timecardData[currentEmployee.id][weekKey][dateKey]) {
-                timecardData[currentEmployee.id][weekKey][dateKey] = {};
-            }
-            timecardData[currentEmployee.id][weekKey][dateKey][category] = value;
-            updateDailyTotals();
-            updateSummary();
-        }
-        
-        function updateDailyTotals() {
-            const weekKey = getWeekKey(currentWeekStart);
-            for (let i = 0; i < 7; i++) {
-                const date = new Date(currentWeekStart);
-                date.setDate(currentWeekStart.getDate() + i);
-                const dateKey = date.toISOString().split('T')[0];
-                const dayData = timecardData[currentEmployee.id][weekKey][dateKey] || {};
-                
-                const total = Object.values(dayData).reduce((sum, value) => {
-                    return sum + (parseFloat(value) || 0);
-                }, 0);
-                
-                const totalElement = document.getElementById(`total-${dateKey}`);
-                if (totalElement) {
-                    totalElement.textContent = `Total: ${total.toFixed(1)} hrs`;
-                }
-            }
-        }
-        
-        function updateSummary() {
+
+        // Load current employee's timecards
+        async function loadMyTimecards() {
             if (!currentEmployee) return;
             
-            const weekKey = getWeekKey(currentWeekStart);
-            const weekData = timecardData[currentEmployee.id][weekKey] || {};
+            try {
+                console.log('Loading timecards for employee:', currentEmployee.id);
+                myTimecards = await database.getTimecards(currentEmployee.id);
+                
+                displayMyTimecards();
+                
+            } catch (error) {
+                console.error('Error loading employee timecards:', error);
+                const tbody = document.getElementById('myTimecardsBody');
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #ef4444;">Failed to load timecards</td></tr>';
+            }
+        }
+
+        // Display employee's timecards
+        function displayMyTimecards() {
+            const tbody = document.getElementById('myTimecardsBody');
             
-            let totals = {};
-            Object.keys(categories).forEach(category => {
-                totals[category] = 0;
-            });
+            if (!myTimecards || myTimecards.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #6b7280;">No timecards found</td></tr>';
+                return;
+            }
+
+            // Sort by date (most recent first)
+            const sortedTimecards = myTimecards.sort((a, b) => new Date(b.date) - new Date(a.date));
             
-            // Calculate weekly totals (only for categories the employee has rates for)
-            Object.values(weekData).forEach(dayData => {
-                Object.entries(dayData).forEach(([category, value]) => {
-                    if (shouldShowCategory(category, currentEmployee)) {
-                        totals[category] += parseFloat(value) || 0;
-                    }
+            tbody.innerHTML = sortedTimecards.map(tc => `
+                <tr>
+                    <td>${new Date(tc.date).toLocaleDateString()}</td>
+                    <td>${tc.hoursWorked || 0}</td>
+                    <td>${tc.projectLocation || 'N/A'}</td>
+                    <td><span class="status-badge status-${tc.status}">${tc.status.toUpperCase()}</span></td>
+                    <td>${tc.submittedAt ? new Date(tc.submittedAt).toLocaleDateString() : 'N/A'}</td>
+                    <td>
+                        <button class="btn" style="padding: 4px 8px; font-size: 12px;" onclick="viewTimecard('${tc.id}')">
+                            View
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Calculate hours automatically
+        function calculateHours() {
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const breakStart = document.getElementById('breakStart').value;
+            const breakEnd = document.getElementById('breakEnd').value;
+            
+            if (!startTime || !endTime) {
+                resetHoursSummary();
+                return;
+            }
+            
+            // Convert time strings to minutes
+            const startMinutes = timeToMinutes(startTime);
+            const endMinutes = timeToMinutes(endTime);
+            
+            if (endMinutes <= startMinutes) {
+                showAlert('End time must be after start time', 'warning');
+                resetHoursSummary();
+                return;
+            }
+            
+            // Calculate total work minutes
+            let totalWorkMinutes = endMinutes - startMinutes;
+            
+            // Subtract break time if provided
+            let breakMinutes = 0;
+            if (breakStart && breakEnd) {
+                const breakStartMinutes = timeToMinutes(breakStart);
+                const breakEndMinutes = timeToMinutes(breakEnd);
+                
+                if (breakEndMinutes > breakStartMinutes && 
+                    breakStartMinutes >= startMinutes && 
+                    breakEndMinutes <= endMinutes) {
+                    breakMinutes = breakEndMinutes - breakStartMinutes;
+                    totalWorkMinutes -= breakMinutes;
+                } else if (breakStart && breakEnd) {
+                    showAlert('Break times must be within work hours', 'warning');
+                }
+            }
+            
+            // Convert to hours
+            const totalHours = totalWorkMinutes / 60;
+            const breakHours = breakMinutes / 60;
+            
+            // Calculate regular vs overtime (assuming 8 hours is regular)
+            const regularHours = Math.min(totalHours, 8);
+            const overtimeHours = Math.max(0, totalHours - 8);
+            
+            // Update display
+            document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+            document.getElementById('regularHours').textContent = regularHours.toFixed(1);
+            document.getElementById('overtimeHours').textContent = overtimeHours.toFixed(1);
+            document.getElementById('breakHours').textContent = breakHours.toFixed(1);
+            
+            // Highlight overtime warning
+            const overtimeElement = document.getElementById('overtimeHours');
+            if (overtimeHours > 0) {
+                overtimeElement.style.color = '#dc2626';
+                if (overtimeHours > 4) {
+                    showAlert('Excessive overtime detected. Please verify your hours.', 'warning');
+                }
+            } else {
+                overtimeElement.style.color = '#166534';
+            }
+        }
+
+        // Convert time string to minutes
+        function timeToMinutes(timeString) {
+            const [hours, minutes] = timeString.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+
+        // Reset hours summary
+        function resetHoursSummary() {
+            document.getElementById('totalHours').textContent = '0.0';
+            document.getElementById('regularHours').textContent = '0.0';
+            document.getElementById('overtimeHours').textContent = '0.0';
+            document.getElementById('breakHours').textContent = '0.0';
+        }
+
+        // Handle form submission
+        async function handleFormSubmission(event) {
+            event.preventDefault();
+            
+            if (!currentEmployee) {
+                showAlert('No employee selected', 'error');
+                return;
+            }
+            
+            // Validate form
+            if (!validateForm()) {
+                return;
+            }
+            
+            // Prepare timecard data
+            const timecardData = {
+                employeeId: currentEmployee.id,
+                employeeName: currentEmployee.name,
+                date: document.getElementById('workDate').value,
+                startTime: document.getElementById('startTime').value,
+                endTime: document.getElementById('endTime').value,
+                breakStart: document.getElementById('breakStart').value || null,
+                breakEnd: document.getElementById('breakEnd').value || null,
+                projectLocation: document.getElementById('projectLocation').value || '',
+                workActivities: document.getElementById('workActivities').value,
+                equipmentUsed: document.getElementById('equipmentUsed').value || '',
+                safetyNotes: document.getElementById('safetyNotes').value || '',
+                hoursWorked: parseFloat(document.getElementById('totalHours').textContent),
+                regularHours: parseFloat(document.getElementById('regularHours').textContent),
+                overtimeHours: parseFloat(document.getElementById('overtimeHours').textContent),
+                status: 'pending',
+                submittedAt: new Date().toISOString()
+            };
+            
+            try {
+                showAlert('Submitting timecard to Google Sheets...', 'info');
+                
+                const result = await database.submitTimecard(timecardData);
+                
+                if (result.success) {
+                    showAlert('Timecard submitted successfully!', 'success');
+                    clearForm();
+                    await loadMyTimecards(); // Refresh timecard list
+                } else {
+                    showAlert(`Failed to submit timecard: ${result.message}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error submitting timecard:', error);
+                showAlert('Failed to submit timecard. Please try again.', 'error');
+            }
+        }
+
+        // Validate form data
+        function validateForm() {
+            const workDate = document.getElementById('workDate').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const workActivities = document.getElementById('workActivities').value.trim();
+            const totalHours = parseFloat(document.getElementById('totalHours').textContent);
+            
+            if (!workDate) {
+                showAlert('Please select a work date', 'error');
+                return false;
+            }
+            
+            if (!startTime || !endTime) {
+                showAlert('Please enter both start and end times', 'error');
+                return false;
+            }
+            
+            if (!workActivities) {
+                showAlert('Please describe your work activities', 'error');
+                return false;
+            }
+            
+            if (totalHours <= 0) {
+                showAlert('Total hours must be greater than 0', 'error');
+                return false;
+            }
+            
+            if (totalHours > 16) {
+                showAlert('Total hours cannot exceed 16 hours per day', 'error');
+                return false;
+            }
+            
+            // Check if date is not in the future
+            const today = new Date();
+            const selectedDate = new Date(workDate);
+            if (selectedDate > today) {
+                showAlert('Cannot submit timecard for future dates', 'error');
+                return false;
+            }
+            
+            // Check if timecard already exists for this date
+            const existingTimecard = myTimecards.find(tc => tc.date === workDate);
+            if (existingTimecard) {
+                if (!confirm(`A timecard already exists for ${workDate}. Do you want to create another entry?`)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Save as draft functionality
+        async function saveAsDraft() {
+            if (!currentEmployee) {
+                showAlert('No employee selected', 'error');
+                return;
+            }
+            
+            // Basic validation for draft
+            const workDate = document.getElementById('workDate').value;
+            if (!workDate) {
+                showAlert('Please select a work date to save draft', 'error');
+                return;
+            }
+            
+            // Prepare draft data
+            const draftData = {
+                employeeId: currentEmployee.id,
+                employeeName: currentEmployee.name,
+                date: workDate,
+                startTime: document.getElementById('startTime').value || '',
+                endTime: document.getElementById('endTime').value || '',
+                breakStart: document.getElementById('breakStart').value || '',
+                breakEnd: document.getElementById('breakEnd').value || '',
+                projectLocation: document.getElementById('projectLocation').value || '',
+                workActivities: document.getElementById('workActivities').value || '',
+                equipmentUsed: document.getElementById('equipmentUsed').value || '',
+                safetyNotes: document.getElementById('safetyNotes').value || '',
+                hoursWorked: parseFloat(document.getElementById('totalHours').textContent) || 0,
+                status: 'draft',
+                submittedAt: new Date().toISOString()
+            };
+            
+            try {
+                showAlert('Saving draft to Google Sheets...', 'info');
+                
+                const result = await database.submitTimecard(draftData);
+                
+                if (result.success) {
+                    showAlert('Draft saved successfully!', 'success');
+                    await loadMyTimecards(); // Refresh timecard list
+                } else {
+                    showAlert(`Failed to save draft: ${result.message}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error saving draft:', error);
+                showAlert('Failed to save draft. Please try again.', 'error');
+            }
+        }
+
+        // Clear form
+        function clearForm() {
+            if (!confirm('Are you sure you want to clear all form data?')) {
+                return;
+            }
+            
+            document.getElementById('timecardSubmissionForm').reset();
+            setDefaultDate();
+            resetHoursSummary();
+            showAlert('Form cleared', 'info');
+        }
+
+        // View timecard details
+        function viewTimecard(timecardId) {
+            const timecard = myTimecards.find(tc => tc.id === timecardId);
+            if (!timecard) {
+                showAlert('Timecard not found', 'error');
+                return;
+            }
+            
+            // Create a modal or detailed view
+            const details = `
+                Date: ${new Date(timecard.date).toLocaleDateString()}
+                Hours: ${timecard.hoursWorked}
+                Status: ${timecard.status.toUpperCase()}
+                Project/Location: ${timecard.projectLocation || 'N/A'}
+                Work Activities: ${timecard.workActivities || 'N/A'}
+                Equipment Used: ${timecard.equipmentUsed || 'N/A'}
+                Safety Notes: ${timecard.safetyNotes || 'N/A'}
+                Submitted: ${timecard.submittedAt ? new Date(timecard.submittedAt).toLocaleString() : 'N/A'}
+            `;
+            
+            alert(details); // In a real app, you'd show a proper modal
+        }
+
+        // Back to employee selection
+        function backToEmployeeSelection() {
+            document.getElementById('timecardForm').classList.remove('active');
+            document.getElementById('employeeSelector').style.display = 'block';
+            currentEmployee = null;
+            
+            // Clear URL parameter
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.delete('employee');
+            window.history.pushState({}, '', newUrl);
+        }
+
+        // Utility function to show alerts
+        function showAlert(message, type = 'info') {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Create new alert
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            // Insert at the top of content
+            const content = document.querySelector('.content');
+            content.insertBefore(alert, content.firstChild);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Show error message in employee grid
+        function showErrorMessage(message) {
+            const grid = document.getElementById('employeeGrid');
+            grid.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+
+        // Listen for database ready event
+        window.addEventListener('databaseReady', function(event) {
+            console.log('Database is ready for timecard submission');
+        });
+
+        // Auto-save draft every 5 minutes while user is typing
+        let autoSaveTimer;
+        function setupAutoSave() {
+            const formInputs = document.querySelectorAll('.form-input, .form-textarea');
+            formInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    clearTimeout(autoSaveTimer);
+                    autoSaveTimer = setTimeout(() => {
+                        if (currentEmployee && document.getElementById('workDate').value) {
+                            console.log('Auto-saving draft...');
+                            // Could implement auto-save here
+                        }
+                    }, 300000); // 5 minutes
                 });
             });
-            
-            // Calculate estimated pay (only for categories with rates)
-            let estimatedPay = currentEmployee.baseSalary || 0;
-            
-            if (currentEmployee.rates) {
-                // Add daily rates (only if employee has these rates)
-                if (shouldShowCategory('revFlight', currentEmployee)) {
-                    estimatedPay += totals.revFlight * (currentEmployee.rates.revFlight || 0);
-                }
-                if (shouldShowCategory('nonRevFlight', currentEmployee)) {
-                    estimatedPay += totals.nonRevFlight * (currentEmployee.rates.nonRevFlightExc || 0);
-                }
-                if (shouldShowCategory('nonRevNonFlight', currentEmployee)) {
-                    estimatedPay += totals.nonRevNonFlight * (currentEmployee.rates.nonRevNonFlight || 0);
-                }
+        }
+
+        // Initialize auto-save when employee is selected
+        document.addEventListener('DOMContentLoaded', function() {
+            setupAutoSave();
+        });
+
+        // Prevent accidental page navigation with unsaved changes
+        let formChanged = false;
+        document.addEventListener('DOMContentLoaded', function() {
+            const formInputs = document.querySelectorAll('.form-input, .form-textarea');
+            formInputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    formChanged = true;
+                });
+            });
+        });
+
+        window.addEventListener('beforeunload', function(event) {
+            if (formChanged && currentEmployee) {
+                event.preventDefault();
+                event.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return event.returnValue;
+            }
+        });
+
+        // Reset form changed flag on successful submission
+        function resetFormChanged() {
+            formChanged = false;
+        }
+
+        // Add to successful submission
+        // After successful submission, call resetFormChanged();
+    </script>
+</body>
+</html>
