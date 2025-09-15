@@ -483,10 +483,16 @@
         }
 
         function setupCalculations() {
-            document.querySelectorAll('input[type="radio"], input[type="number"]').forEach(input => {
-                input.addEventListener('change', calculateTotals);
-                input.addEventListener('input', calculateTotals);
-            });
+            // Add event listeners after a slight delay to ensure DOM is ready
+            setTimeout(() => {
+                document.querySelectorAll('input[type="radio"], input[type="number"]').forEach(input => {
+                    input.addEventListener('change', calculateTotals);
+                    input.addEventListener('input', calculateTotals);
+                });
+                
+                // Initial calculation to set up the display
+                calculateTotals();
+            }, 100);
             
             document.getElementById('weekStarting').addEventListener('change', updateDayDates);
             generateWeekSummary();
@@ -496,16 +502,20 @@
             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
             let weeklyTotals = {};
             
+            // Initialize weekly totals for all categories
             payCategories.forEach(cat => {
                 weeklyTotals[cat.id] = { hours: 0, pay: 0 };
             });
 
+            // Get only the active categories (those with rates > 0)
+            const activeCategories = payCategories.filter(cat => 
+                currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
+            );
+
             days.forEach(day => {
                 let dayTotal = 0;
 
-                payCategories.forEach(category => {
-                    if (!currentEmployee[category.rateField] || parseFloat(currentEmployee[category.rateField]) <= 0) return;
-                    
+                activeCategories.forEach(category => {
                     const rate = parseFloat(currentEmployee[category.rateField]);
                     let hours = 0;
                     
@@ -523,9 +533,10 @@
                     
                     const pay = hours * rate;
                     
+                    // Update individual pay display
                     const payDisplay = document.getElementById(`${day}_${category.id}_pay`);
                     if (payDisplay) {
-                        payDisplay.textContent = `$${pay.toFixed(2)}`;
+                        payDisplay.textContent = `${pay.toFixed(2)}`;
                     }
                     
                     dayTotal += pay;
@@ -533,9 +544,10 @@
                     weeklyTotals[category.id].pay += pay;
                 });
 
+                // Update daily total
                 const dayTotalElement = document.getElementById(`${day}_total`);
                 if (dayTotalElement) {
-                    dayTotalElement.textContent = `$${dayTotal.toFixed(2)}`;
+                    dayTotalElement.textContent = `${dayTotal.toFixed(2)}`;
                 }
             });
 
@@ -582,24 +594,31 @@
             let totalHours = 0;
             let totalPay = 0;
 
-            Object.keys(totals).forEach(categoryId => {
-                const hoursElement = document.getElementById(`week_${categoryId}_hours`);
-                const payElement = document.getElementById(`week_${categoryId}_pay`);
+            // Get only the active categories
+            const activeCategories = payCategories.filter(cat => 
+                currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
+            );
+
+            // Update individual category totals
+            activeCategories.forEach(category => {
+                const hoursElement = document.getElementById(`week_${category.id}_hours`);
+                const payElement = document.getElementById(`week_${category.id}_pay`);
                 
-                if (hoursElement && payElement) {
-                    hoursElement.textContent = totals[categoryId].hours.toFixed(1);
-                    payElement.textContent = `$${totals[categoryId].pay.toFixed(2)}`;
+                if (hoursElement && payElement && totals[category.id]) {
+                    hoursElement.textContent = totals[category.id].hours.toFixed(1);
+                    payElement.textContent = `${totals[category.id].pay.toFixed(2)}`;
                     
-                    totalHours += totals[categoryId].hours;
-                    totalPay += totals[categoryId].pay;
+                    totalHours += totals[category.id].hours;
+                    totalPay += totals[category.id].pay;
                 }
             });
 
+            // Update overall totals
             const totalHoursElement = document.getElementById('week_total_hours');
             const totalPayElement = document.getElementById('week_total_pay');
             
             if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
-            if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(2)}`;
+            if (totalPayElement) totalPayElement.textContent = `${totalPay.toFixed(2)}`;
         }
 
         async function submitTimecard() {
