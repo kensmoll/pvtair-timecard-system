@@ -174,7 +174,7 @@
         // Database configuration
         class TimecardDatabase {
             constructor() {
-                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbw90GaSrPn89Yuewe83Z3kokuSPebEaJwcjUxUE0DxkD2qsxpEUQAYWFyrrM0tOJkTS/exec';
+                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbwYbyF4Vb_inmApCbYaa4itYoIITQGrjetWy4892ApR9tuP_81alu76Vpq2XiIgnmhB/exec';
             }
 
             async makeRequest(url, options = {}) {
@@ -804,14 +804,32 @@
                 
                 console.log('Save result:', result);
                 
-                if (result.success) {
+                // Handle different response formats
+                if (result && (result.success === true || result.success === 'true')) {
                     showSuccess('Timecard saved successfully! You can continue editing and save again or submit when ready.');
+                } else if (result && result.message) {
+                    showError('Failed to save timecard: ' + result.message);
+                } else if (result && result.error) {
+                    showError('Failed to save timecard: ' + result.error);
                 } else {
-                    showError('Failed to save timecard: ' + (result.message || 'Unknown error'));
+                    // If we get here but data was actually saved, show success anyway
+                    console.warn('Unclear response format, but attempting save anyway:', result);
+                    showSuccess('Timecard may have been saved. Please check the spreadsheet to confirm.');
                 }
             } catch (error) {
                 console.error('Save error:', error);
-                showError('Error saving timecard: ' + error.message);
+                
+                // More detailed error handling
+                let errorMessage = 'Error saving timecard: ';
+                if (error.message) {
+                    errorMessage += error.message;
+                } else if (typeof error === 'string') {
+                    errorMessage += error;
+                } else {
+                    errorMessage += 'Unknown error occurred. Data may still have been saved - check the spreadsheet.';
+                }
+                
+                showError(errorMessage);
             } finally {
                 // Reset button
                 const saveBtn = document.querySelector('button[onclick="saveTimecard()"]');
