@@ -367,71 +367,107 @@
                 currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
             );
 
-            let entriesHTML = '';
+            if (activeCategories.length === 0) {
+                container.innerHTML = '<div class="error">No pay categories found for this employee.</div>';
+                return;
+            }
 
+            // Create table structure
+            let tableHTML = `
+                <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);">
+                    <h3 style="margin-bottom: 20px; color: #1f2937; text-align: center;">Weekly Timecard</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <thead>
+                            <tr style="background: #f8fafc;">
+                                <th style="padding: 12px; text-align: left; border: 1px solid #e5e7eb; font-weight: 600;">Day</th>
+                                <th style="padding: 12px; text-align: left; border: 1px solid #e5e7eb; font-weight: 600;">Date</th>
+            `;
+
+            // Add category headers
+            activeCategories.forEach(category => {
+                const rate = parseFloat(currentEmployee[category.rateField]);
+                tableHTML += `<th style="padding: 12px; text-align: center; border: 1px solid #e5e7eb; font-weight: 600; font-size: 12px;">${category.label}<br><small>${rate.toFixed(2)}/hr</small></th>`;
+            });
+
+            tableHTML += `
+                                <th style="padding: 12px; text-align: center; border: 1px solid #e5e7eb; font-weight: 600; background: #f0fdf4;">Daily Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            // Add rows for each day
             days.forEach((day, index) => {
                 const dayLower = day.toLowerCase();
                 
-                entriesHTML += `
-                    <div class="day-entry">
-                        <div class="day-header">
-                            <h4>${day}</h4>
-                            <span id="${dayLower}Date"></span>
-                        </div>
-                        <div class="activity-grid">
+                tableHTML += `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 12px; border: 1px solid #e5e7eb; font-weight: 600;">${day}</td>
+                        <td style="padding: 12px; border: 1px solid #e5e7eb; font-size: 12px;" id="${dayLower}Date"></td>
                 `;
 
+                // Add input cells for each category
                 activeCategories.forEach(category => {
                     const rate = parseFloat(currentEmployee[category.rateField]);
                     
-                    entriesHTML += `
-                        <div class="activity-item">
-                            <div class="activity-label">${category.label}</div>
-                    `;
+                    tableHTML += `<td style="padding: 8px; border: 1px solid #e5e7eb; text-align: center;">`;
                     
                     if (category.type === 'radio') {
-                        entriesHTML += `
-                            <div class="radio-group">
-                                <div class="radio-option">
-                                    <input type="radio" name="${dayLower}_${category.id}" value="0" checked 
-                                           data-day="${dayLower}" data-category="${category.id}" data-rate="${rate}">
-                                    <label>0</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" name="${dayLower}_${category.id}" value="0.5"
-                                           data-day="${dayLower}" data-category="${category.id}" data-rate="${rate}">
-                                    <label>0.5</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" name="${dayLower}_${category.id}" value="1"
-                                           data-day="${dayLower}" data-category="${category.id}" data-rate="${rate}">
-                                    <label>1</label>
-                                </div>
+                        tableHTML += `
+                            <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 4px;">
+                                <label style="font-size: 11px;"><input type="radio" name="${dayLower}_${category.id}" value="0" checked data-day="${dayLower}" data-category="${category.id}" data-rate="${rate}"> 0</label>
+                                <label style="font-size: 11px;"><input type="radio" name="${dayLower}_${category.id}" value="0.5" data-day="${dayLower}" data-category="${category.id}" data-rate="${rate}"> 0.5</label>
+                                <label style="font-size: 11px;"><input type="radio" name="${dayLower}_${category.id}" value="1" data-day="${dayLower}" data-category="${category.id}" data-rate="${rate}"> 1</label>
                             </div>
                         `;
                     } else {
-                        entriesHTML += `
-                            <input type="number" class="hours-input" 
+                        tableHTML += `
+                            <input type="number" style="width: 60px; padding: 4px; border: 1px solid #e5e7eb; border-radius: 4px; text-align: center;" 
                                    id="${dayLower}_${category.id}" 
                                    min="0" max="24" step="0.1" value="0"
                                    data-day="${dayLower}" data-category="${category.id}" data-rate="${rate}">
                         `;
                     }
                     
-                    entriesHTML += `
-                            <div class="pay-display" id="${dayLower}_${category.id}_pay">$0.00</div>
-                        </div>
-                    `;
+                    tableHTML += `
+                            <div style="font-size: 11px; color: #166534; font-weight: 600; margin-top: 2px;" id="${dayLower}_${category.id}_pay">$0.00</div>
+                        </td>`;
                 });
 
-                entriesHTML += `
-                        </div>
-                        <div class="day-total">Daily Total: <span id="${dayLower}_total">$0.00</span></div>
-                    </div>
+                // Daily total cell
+                tableHTML += `
+                        <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: center; background: #f0fdf4; font-weight: 600;" id="${dayLower}_total">$0.00</td>
+                    </tr>
                 `;
             });
 
-            container.innerHTML = entriesHTML;
+            // Weekly totals row
+            tableHTML += `
+                    <tr style="background: #f8fafc; font-weight: 600;">
+                        <td style="padding: 12px; border: 1px solid #e5e7eb;" colspan="2">Weekly Total</td>
+            `;
+
+            activeCategories.forEach(category => {
+                tableHTML += `
+                    <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: center;">
+                        <div id="week_${category.id}_hours">0.0</div>
+                        <div style="font-size: 11px; color: #166534;" id="week_${category.id}_pay">$0.00</div>
+                    </td>
+                `;
+            });
+
+            tableHTML += `
+                        <td style="padding: 12px; border: 1px solid #e5e7eb; text-align: center; background: #f0fdf4;">
+                            <div id="week_total_hours">0.0 hrs</div>
+                            <div style="color: #166534;" id="week_total_pay">$0.00</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+            `;
+
+            container.innerHTML = tableHTML;
             updateDayDates();
         }
 
