@@ -174,7 +174,7 @@
         // Database configuration
         class TimecardDatabase {
             constructor() {
-                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbw90GaSrPn89Yuewe83Z3kokuSPebEaJwcjUxUE0DxkD2qsxpEUQAYWFyrrM0tOJkTS/exec';
+                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbwYbyF4Vb_inmApCbYaa4itYoIITQGrjetWy4892ApR9tuP_81alu76Vpq2XiIgnmhB/exec';
             }
 
             async makeRequest(url, options = {}) {
@@ -273,22 +273,20 @@
                 }
             }
 
-            // Alternative method using GET with URL parameters for testing
-            async submitTimecardViaGet(data) {
+            async getExistingTimecard(employeeId, weekStarting) {
                 try {
+                    console.log('Getting existing timecard for:', employeeId, weekStarting);
                     const params = new URLSearchParams();
-                    params.append('action', 'submitTimecard');
-                    params.append('data', JSON.stringify(data));
+                    params.append('action', 'getExistingTimecard');
+                    params.append('data', JSON.stringify({ employee_id: employeeId, week_starting: weekStarting }));
                     
                     const url = `${this.scriptUrl}?${params.toString()}`;
-                    console.log('Submitting via GET:', url);
-                    
                     const result = await this.makeRequest(url);
-                    console.log('GET Submit response:', result);
+                    console.log('Existing timecard response:', result);
                     return result;
                 } catch (error) {
-                    console.error('Error submitting timecard via GET:', error);
-                    throw new Error('Failed to submit timecard via GET: ' + error.message);
+                    console.error('Error getting existing timecard:', error);
+                    throw new Error('Failed to get existing timecard: ' + error.message);
                 }
             }
         }
@@ -380,10 +378,92 @@
                 console.log('Current employee:', currentEmployee);
                 setupTimecardForm();
                 
+                // After setting up the form, try to load existing timecard data
+                await loadExistingTimecard();
+                
             } catch (error) {
                 console.error('Error loading employee timecard:', error);
                 showError('Failed to load employee data: ' + error.message);
             }
+        }
+
+        async function loadExistingTimecard() {
+            try {
+                const weekStarting = document.getElementById('weekStarting').value;
+                if (!weekStarting || !currentEmployee) {
+                    return; // No week selected or no employee
+                }
+                
+                console.log('Loading existing timecard for week:', weekStarting);
+                const result = await database.getExistingTimecard(currentEmployee.id, weekStarting);
+                
+                if (result.success && result.data) {
+                    console.log('Found existing timecard:', result.data);
+                    populateFormWithExistingData(result.data);
+                    showSuccess('Loaded existing timecard data for week of ' + weekStarting);
+                } else {
+                    console.log('No existing timecard found for this week');
+                }
+            } catch (error) {
+                console.error('Error loading existing timecard:', error);
+                // Don't show error to user - just silently continue with blank form
+            }
+        }
+
+        function populateFormWithExistingData(timecardData) {
+            console.log('Populating form with existing data:', timecardData);
+            
+            // Map the weekly totals back to daily entries
+            // Since we only have weekly totals, distribute them evenly or put them all on Monday
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            
+            // For simplicity, put all hours on Monday (user can redistribute as needed)
+            if (timecardData.rev_flight && parseFloat(timecardData.rev_flight) > 0) {
+                const revFlightRadios = document.querySelectorAll('input[name="monday_rev_flight"]');
+                const value = parseFloat(timecardData.rev_flight);
+                revFlightRadios.forEach(radio => {
+                    if (parseFloat(radio.value) === value) {
+                        radio.checked = true;
+                    }
+                });
+            }
+            
+            if (timecardData.non_rev_flight_exc && parseFloat(timecardData.non_rev_flight_exc) > 0) {
+                const nonRevExcRadios = document.querySelectorAll('input[name="monday_non_rev_flight_exc"]');
+                const value = parseFloat(timecardData.non_rev_flight_exc);
+                nonRevExcRadios.forEach(radio => {
+                    if (parseFloat(radio.value) === value) {
+                        radio.checked = true;
+                    }
+                });
+            }
+            
+            if (timecardData.non_rev_non_flight && parseFloat(timecardData.non_rev_non_flight) > 0) {
+                const nonRevNonFlightRadios = document.querySelectorAll('input[name="monday_non_rev_non_flight"]');
+                const value = parseFloat(timecardData.non_rev_non_flight);
+                nonRevNonFlightRadios.forEach(radio => {
+                    if (parseFloat(radio.value) === value) {
+                        radio.checked = true;
+                    }
+                });
+            }
+            
+            if (timecardData.mx_hours && parseFloat(timecardData.mx_hours) > 0) {
+                const mxInput = document.getElementById('monday_mx_hourly');
+                if (mxInput) {
+                    mxInput.value = parseFloat(timecardData.mx_hours);
+                }
+            }
+            
+            if (timecardData.admin_hours && parseFloat(timecardData.admin_hours) > 0) {
+                const adminInput = document.getElementById('monday_admin_hourly');
+                if (adminInput) {
+                    adminInput.value = parseFloat(timecardData.admin_hours);
+                }
+            }
+            
+            // Recalculate totals after populating
+            calculateTotals();
         }
 
         function setupTimecardForm() {
@@ -549,6 +629,9 @@
                     dateElement.textContent = date.toLocaleDateString();
                 }
             });
+            
+            // Load existing timecard data when week changes
+            loadExistingTimecard();
         }
 
         function generateWeekSummary() {
