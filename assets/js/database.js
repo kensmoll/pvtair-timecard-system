@@ -9,7 +9,7 @@ class PVTAIRDatabase {
         // Google Apps Script Configuration
         this.spreadsheetId = '1Jo39kWkJcNF-LEymNXmL8PgjipoEDvByyeI71YiElIs';
         this.deploymentId = 'AKfycbxf6AZI5D3oAmzifNudufYI4qchUFDHTCZ6jVRmCx4T11oFKXFnr44SGDBOc2MmYOMj';
-        this.scriptUrl = 'https://script.google.com/macros/s/AKfycbywtkqW4sWEdw6rOvMoIDLWV_UqC1UiF97_KZW5myAbaQzTwtVevVRDNo2cgBALK7VP/exec';
+        this.scriptUrl = 'https://script.google.com/macros/s/AKfycbxf6AZI5D3oAmzifNudufYI4qchUFDHTCZ6jVRmCx4T11oFKXFnr44SGDBOc2MmYOMj/exec';
         
         // Connection status
         this.isConnected = false;
