@@ -678,6 +678,32 @@
             document.getElementById('nextWeekBtn').disabled = nextWeek > today;
         }
         
+        // Check if a category should be shown for an employee (hide if rate is 0 or missing)
+        function shouldShowCategory(categoryKey, employee) {
+            if (!employee || !employee.rates) {
+                return false;
+            }
+            
+            // Map category keys to rate property names
+            const rateMapping = {
+                'revFlight': 'revFlight',
+                'nonRevFlight': 'nonRevFlightExc', 
+                'nonRevNonFlight': 'nonRevNonFlight',
+                'mx': 'mxHourly',
+                'admin': 'adminHourly'
+            };
+            
+            const rateProperty = rateMapping[categoryKey];
+            if (!rateProperty) {
+                return false;
+            }
+            
+            const rate = employee.rates[rateProperty];
+            
+            // Hide if rate is 0, null, undefined, or empty string
+            return rate != null && rate !== '' && parseFloat(rate) > 0;
+        }
+        
         function generateTimecardGrid() {
             const grid = document.getElementById('timecardGrid');
             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -695,6 +721,11 @@
                         <div class="day-date">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
                         
                         ${Object.entries(categories).map(([categoryKey, category]) => {
+                            // Skip category if employee doesn't have this rate or rate is zero
+                            if (!shouldShowCategory(categoryKey, currentEmployee)) {
+                                return '';
+                            }
+                            
                             const step = categoryKey === 'revFlight' ? '1' : '0.5';
                             const placeholder = categoryKey === 'revFlight' ? 'Full days only' : '0';
                             
@@ -717,7 +748,7 @@
                                     >
                                 </div>
                             `;
-                        }).join('')}
+                        }).filter(html => html !== '').join('')}
                         
                         <div class="daily-total" id="total-${dateKey}">
                             Total: 0.0 hrs
@@ -779,10 +810,12 @@
                 totals[category] = 0;
             });
             
-            // Calculate weekly totals
+            // Calculate weekly totals (only for categories the employee has rates for)
             Object.values(weekData).forEach(dayData => {
                 Object.entries(dayData).forEach(([category, value]) => {
-                    totals[category] += parseFloat(value) || 0;
+                    if (shouldShowCategory(category, currentEmployee)) {
+                        totals[category] += parseFloat(value) || 0;
+                    }
                 });
             });
             
@@ -800,429 +833,3 @@
                 if (shouldShowCategory('nonRevNonFlight', currentEmployee)) {
                     estimatedPay += totals.nonRevNonFlight * (currentEmployee.rates.nonRevNonFlight || 0);
                 }
-                
-                // Add hourly rates (only if employee has these rates)
-                if (shouldShowCategory('mx', currentEmployee)) {
-                    estimatedPay += totals.mx * (currentEmployee.rates.mxHourly || 0);
-                }
-                if (shouldShowCategory('admin', currentEmployee)) {
-                    estimatedPay += totals.admin * (currentEmployee.rates.adminHourly || 0);
-                }
-            }
-            
-            const totalHours = Object.values(totals).reduce((sum, hours) => sum + hours, 0);
-            
-            // Update summary display
-            const summaryHtml = `
-                <div class="summary-item">
-                    <div class="summary-label">Total Hours</div>
-                    <div class="summary-value">${totalHours.toFixed(1)}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Flight Days</div>
-                    <div class="summary-value">${(totals.revFlight + totals.nonRevFlight).toFixed(1)}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">MX Hours</div>
-                    <div class="summary-value">${totals.mx.toFixed(1)}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Admin Hours</div>
-                    <div class="summary-value">${totals.admin.toFixed(1)}</div>
-                </div>
-                <div class="summary-item estimated-pay">
-                    <div class="summary-label">Estimated Pay</div>
-                    <div class="summary-value">${estimatedPay.toFixed(2)}</div>
-                </div>
-            `;
-            
-            document.getElementById('weeklySummary').innerHTML = summaryHtml;
-        }
-        
-        function navigateWeek(direction) {
-            currentWeekStart.setDate(currentWeekStart.getDate() + (direction * 7));
-            initializeTimecard();
-            updateWeekDisplay();
-            generateTimecardGrid();
-            updateSummary();
-        }
-        
-        // Submit timecard with database integration
-        async function submitTimecard() {
-            if (!currentEmployee) {
-                showAlert('No employee selected', 'info');
-                return;
-            }
-            
-            const weekKey = getWeekKey(currentWeekStart);
-            const weekData = timecardData[currentEmployee.id][weekKey];
-            
-            // Check if there's any data to submit
-            let hasData = false;
-            for (const [dateKey, dayData] of Object.entries(weekData)) {
-                if (Object.values(dayData).some(value => parseFloat(value) > 0)) {
-                    hasData = true;
-                    break;
-                }
-            }
-            
-            if (!hasData) {
-                showAlert('No timecard data to submit. Please enter your hours first.', 'info');
-                return;
-            }
-            
-            // Disable submit button during submission
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Submitting...';
-            
-            try {
-                showAlert('Submitting timecard...', 'info');
-                let savedDays = 0;
-                
-                for (const [dateKey, dayData] of Object.entries(weekData)) {
-                    // Only save days that have data
-                    if (Object.values(dayData).some(value => parseFloat(value) > 0)) {
-                        const result = await database.saveTimecard(
-                            currentEmployee.id,
-                            dateKey,
-                            {
-                                revFlight: parseFloat(dayData.revFlight) || 0,
-                                nonRevFlightExc: parseFloat(dayData.nonRevFlight) || 0,
-                                nonRevNonFlight: parseFloat(dayData.nonRevNonFlight) || 0,
-                                mx: parseFloat(dayData.mx) || 0,
-                                admin: parseFloat(dayData.admin) || 0
-                            }
-                        );
-                        savedDays++;
-                    }
-                }
-                
-                showAlert(`Timecard submitted successfully! Saved ${savedDays} day(s) of data.`, 'success');
-                console.log(`Timecard submitted for ${currentEmployee.name}, ${savedDays} days saved`);
-                
-            } catch (error) {
-                console.error('Error submitting timecard:', error);
-                showAlert('Error submitting timecard: ' + error.message, 'info');
-            } finally {
-                // Re-enable submit button
-                submitBtn.disabled = false;
-                submitBtn.textContent = '💾 Submit Timecard';
-            }
-        }
-        
-        function clearTimecard() {
-            if (!currentEmployee) return;
-            
-            if (confirm('Are you sure you want to clear all timecard entries for this week?')) {
-                const weekKey = getWeekKey(currentWeekStart);
-                
-                // Clear the data
-                for (let i = 0; i < 7; i++) {
-                    const date = new Date(currentWeekStart);
-                    date.setDate(currentWeekStart.getDate() + i);
-                    const dateKey = date.toISOString().split('T')[0];
-                    timecardData[currentEmployee.id][weekKey][dateKey] = {};
-                    Object.keys(categories).forEach(category => {
-                        timecardData[currentEmployee.id][weekKey][dateKey][category] = '';
-                    });
-                }
-                
-                // Regenerate the grid
-                generateTimecardGrid();
-                updateSummary();
-                
-                showAlert('Timecard cleared successfully.', 'info');
-            }
-        }
-        
-        function saveAsDraft() {
-            if (!currentEmployee) {
-                showAlert('No employee selected', 'info');
-                return;
-            }
-            
-            // In a real implementation, this would save to a draft state
-            // For now, we'll just show a confirmation
-            showAlert('Timecard saved as draft locally. Remember to submit when complete!', 'info');
-            console.log('Draft saved for', currentEmployee.name);
-        }
-        
-        function showAlert(message, type = 'info') {
-            // Remove existing alerts
-            const existingAlerts = document.querySelectorAll('.alert');
-            existingAlerts.forEach(alert => alert.remove());
-            
-            // Create new alert
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.textContent = message;
-            
-            // Insert at the top of content
-            const content = document.querySelector('.content');
-            content.insertBefore(alert, content.firstChild);
-            
-            // Auto-remove after 5 seconds
-            setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.remove();
-                }
-            }, 5000);
-        }
-        
-        function showErrorMessage(message) {
-            const grid = document.getElementById('employeeGrid');
-            grid.innerHTML = `<div class="error-message">${message}</div>`;
-        }
-        
-        // Back to employee selection
-        function backToEmployeeSelection() {
-            document.getElementById('timecardForm').classList.remove('active');
-            document.getElementById('employeeSelector').style.display = 'block';
-            document.getElementById('employeeName').textContent = 'Select Employee';
-            currentEmployee = null;
-            
-            // Clear URL parameter
-            const newUrl = new URL(window.location);
-            newUrl.searchParams.delete('employee');
-            window.history.pushState({}, '', newUrl);
-        }
-        
-        // Add back button functionality (optional)
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && currentEmployee) {
-                backToEmployeeSelection();
-            }
-        });
-        
-        // Debug function to check employee data
-        function debugEmployeeData() {
-            console.log('=== EMPLOYEE DEBUG INFO ===');
-            console.log('Employees array:', employees);
-            console.log('Number of employees:', employees.length);
-            console.log('Database object:', typeof database);
-            console.log('Current employee:', currentEmployee);
-            
-            if (employees.length > 0) {
-                console.log('Sample employee:', employees[0]);
-            }
-        }
-        
-        // Make debug function available globally
-        window.debugEmployeeData = debugEmployeeData;
-        
-        console.log('Timecard script loaded. Use debugEmployeeData() to check employee data.');
-    </script>
-
-    <!-- DATABASE INTEGRATION SCRIPT -->
-    <script>
-        // Create the database object with Google Sheets integration
-        console.log('Creating database object...');
-
-        window.database = {
-            // Configuration - UPDATE YOUR API KEY HERE
-            config: {
-                API_KEY: 'YOUR_GOOGLE_SHEETS_API_KEY_HERE', // ⚠️ REPLACE WITH YOUR ACTUAL API KEY
-                SPREADSHEET_ID: '1Jo39kWkJcNF-LEymNXmL8PgjipoEDvByyeI71YiElIs',
-                EMPLOYEES_RANGE: 'Employees!A:H',
-                TIMECARD_RANGE: 'Timecards!A:I',
-                DISCOVERY_DOC: 'https://sheets.googleapis.com/$discovery/rest?version=v4'
-            },
-            
-            isInitialized: false,
-            employees: [],
-            
-            // Initialize Google Sheets API
-            async init() {
-                try {
-                    console.log('Initializing Google Sheets API...');
-                    
-                    // Load Google API if not already loaded
-                    if (typeof gapi === 'undefined') {
-                        await this.loadGoogleAPI();
-                    }
-                    
-                    // Initialize the API
-                    await new Promise((resolve, reject) => {
-                        gapi.load('client', async () => {
-                            try {
-                                await gapi.client.init({
-                                    apiKey: this.config.API_KEY,
-                                    discoveryDocs: [this.config.DISCOVERY_DOC]
-                                });
-                                
-                                this.isInitialized = true;
-                                console.log('Database connection successful!');
-                                resolve();
-                            } catch (error) {
-                                reject(error);
-                            }
-                        });
-                    });
-                    
-                } catch (error) {
-                    console.error('Database initialization failed:', error);
-                    throw error;
-                }
-            },
-            
-            // Load Google API script
-            async loadGoogleAPI() {
-                return new Promise((resolve, reject) => {
-                    if (typeof gapi !== 'undefined') {
-                        resolve();
-                        return;
-                    }
-                    
-                    const script = document.createElement('script');
-                    script.src = 'https://apis.google.com/js/api.js';
-                    script.onload = resolve;
-                    script.onerror = reject;
-                    document.head.appendChild(script);
-                });
-            },
-            
-            // Get employees from Google Sheets
-            async getEmployees() {
-                try {
-                    if (!this.isInitialized) {
-                        await this.init();
-                    }
-                    
-                    console.log('Fetching employees from Google Sheets...');
-                    
-                    const response = await gapi.client.sheets.spreadsheets.values.get({
-                        spreadsheetId: this.config.SPREADSHEET_ID,
-                        range: this.config.EMPLOYEES_RANGE
-                    });
-                    
-                    const rows = response.result.values;
-                    if (!rows || rows.length === 0) {
-                        console.warn('No employee data found in spreadsheet');
-                        return [];
-                    }
-                    
-                    // Parse employee data (skip header row)
-                    const headers = rows[0];
-                    this.employees = [];
-                    
-                    for (let i = 1; i < rows.length; i++) {
-                        const row = rows[i];
-                        if (row.length > 0 && row[0]) { // Skip empty rows
-                            const employee = this.parseEmployeeRow(headers, row);
-                            if (employee) {
-                                this.employees.push(employee);
-                            }
-                        }
-                    }
-                    
-                    console.log(`Found ${this.employees.length} employees`);
-                    return this.employees;
-                    
-                } catch (error) {
-                    console.error('Error loading employees:', error);
-                    throw error;
-                }
-            },
-            
-            // Parse a single employee row
-            parseEmployeeRow(headers, row) {
-                try {
-                    // Map common column names
-                    const getColumnValue = (possibleNames) => {
-                        for (const name of possibleNames) {
-                            const index = headers.findIndex(h => 
-                                h.toLowerCase().replace(/[^a-z0-9]/g, '') === name.toLowerCase().replace(/[^a-z0-9]/g, '')
-                            );
-                            if (index >= 0 && row[index]) {
-                                return row[index];
-                            }
-                        }
-                        return null;
-                    };
-                    
-                    // Extract employee data
-                    const id = getColumnValue(['employee_id', 'employeeid', 'id', 'employee id']);
-                    const name = getColumnValue(['name', 'employee_name', 'employeename', 'full_name']);
-                    const baseSalary = getColumnValue(['base_salary', 'basesalary', 'salary', 'base salary']);
-                    const revFlightRate = getColumnValue(['rev_flight_rate', 'revflight', 'rev flight', 'revenue flight rate']);
-                    const nonRevRate = getColumnValue(['non_rev_rate', 'nonrev', 'non rev', 'non revenue rate']);
-                    const nonRevNonFlightRate = getColumnValue(['non_rev_non_flight', 'nonrevnonflight', 'non rev non flight']);
-                    const mxRate = getColumnValue(['mx_rate', 'mxrate', 'mx', 'maintenance rate']);
-                    const adminRate = getColumnValue(['admin_rate', 'adminrate', 'admin', 'administrative rate']);
-                    
-                    if (!id || !name) {
-                        console.warn('Skipping employee row - missing ID or name:', row);
-                        return null;
-                    }
-                    
-                    return {
-                        id: String(id).toLowerCase().replace(/[^a-z0-9]/g, ''), // Clean ID format
-                        name: String(name),
-                        baseSalary: parseFloat(baseSalary) || 0,
-                        rates: {
-                            revFlight: parseFloat(revFlightRate) || 0,
-                            nonRevFlightExc: parseFloat(nonRevRate) || 0,
-                            nonRevNonFlight: parseFloat(nonRevNonFlightRate) || 0,
-                            mxHourly: parseFloat(mxRate) || 0,
-                            adminHourly: parseFloat(adminRate) || 0
-                        }
-                    };
-                    
-                } catch (error) {
-                    console.error('Error parsing employee row:', row, error);
-                    return null;
-                }
-            },
-            
-            // Save timecard data to Google Sheets
-            async saveTimecard(employeeId, date, hours) {
-                try {
-                    if (!this.isInitialized) {
-                        await this.init();
-                    }
-                    
-                    console.log('Saving timecard to Google Sheets:', employeeId, date, hours);
-                    
-                    // Find or create row for this employee/date combination
-                    const rowData = [
-                        employeeId,
-                        date,
-                        hours.revFlight || 0,
-                        hours.nonRevFlightExc || 0,
-                        hours.nonRevNonFlight || 0,
-                        hours.mx || 0,
-                        hours.admin || 0,
-                        new Date().toISOString(), // timestamp
-                        'submitted' // status
-                    ];
-                    
-                    // For now, just append new rows (you can enhance this to update existing rows)
-                    await gapi.client.sheets.spreadsheets.values.append({
-                        spreadsheetId: this.config.SPREADSHEET_ID,
-                        range: 'Timecards!A:I',
-                        valueInputOption: 'RAW',
-                        insertDataOption: 'INSERT_ROWS',
-                        resource: {
-                            values: [rowData]
-                        }
-                    });
-                    
-                    console.log(`Timecard saved for ${employeeId} on ${date}`);
-                    return { success: true, employeeId, date, hours };
-                    
-                } catch (error) {
-                    console.error('Error saving timecard:', error);
-                    throw error;
-                }
-            }
-        };
-
-        // Auto-initialize when the page loads
-        console.log('Database object created, initializing...');
-        window.database.init().catch(error => {
-            console.error('Failed to initialize database:', error);
-        });
-    </script>
-</body>
-</html>
