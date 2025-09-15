@@ -206,8 +206,42 @@
         </div>
     </div>
 
-    <script src="../assets/js/database.js"></script>
     <script>
+        // Database configuration with correct deployment ID
+        class TimecardDatabase {
+            constructor() {
+                this.apiKey = 'AIzaSyC5jWKcsb5LyYFHmGtOEEIAT6tIt0hPZs8';
+                this.spreadsheetId = '1Jo39kWkJcNF-LEymNXmL8PgjipoEDvByyeI71YiElIs';
+                this.deploymentId = 'AKfycbxf6AZI5D3oAmzifNudufYI4qchUFDHTCZ6jVRmCx4T11oFKXFnr44SGDBOc2MmYOMj';
+                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbxf6AZI5D3oAmzifNudufYI4qchUFDHTCZ6jVRmCx4T11oFKXFnr44SGDBOc2MmYOMj/exec';
+            }
+
+            async getEmployees() {
+                try {
+                    const response = await fetch(`${this.scriptUrl}?action=getEmployees`);
+                    const result = await response.json();
+                    return result.data || [];
+                } catch (error) {
+                    throw new Error('Failed to load employees: ' + error.message);
+                }
+            }
+
+            async submitTimecard(data) {
+                try {
+                    const response = await fetch(this.scriptUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'submitTimecard', data: data })
+                    });
+                    const result = await response.json();
+                    return result;
+                } catch (error) {
+                    throw new Error('Failed to submit timecard: ' + error.message);
+                }
+            }
+        }
+
+        const database = new TimecardDatabase();
         let currentEmployee = null;
         let payCategories = [
             { id: 'rev_flight', label: 'Revenue Flight', rateField: 'rate_rev_flight', type: 'radio' },
