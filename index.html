@@ -152,6 +152,7 @@
                 </div>
                 
                 <div style="text-align: center;">
+                    <button class="btn" onclick="saveTimecard()" style="background: linear-gradient(135deg, #059669, #047857);">Save Progress</button>
                     <button class="btn" onclick="submitTimecard()">Submit Timecard</button>
                     <button class="btn" onclick="goBackToEmployeeList()" style="background: linear-gradient(135deg, #6b7280, #4b5563);">Back to Employee List</button>
                 </div>
@@ -176,11 +177,38 @@
                 this.scriptUrl = 'https://script.google.com/macros/s/AKfycbwYbyF4Vb_inmApCbYaa4itYoIITQGrjetWy4892ApR9tuP_81alu76Vpq2XiIgnmhB/exec';
             }
 
+            async makeRequest(url, options = {}) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        signal: controller.signal,
+                        mode: 'cors',
+                        credentials: 'omit'
+                    });
+                    clearTimeout(timeoutId);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const result = await response.json();
+                    return result;
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    if (error.name === 'AbortError') {
+                        throw new Error('Request timed out - please try again');
+                    }
+                    throw error;
+                }
+            }
+
             async getEmployees() {
                 try {
                     console.log('Fetching employees...');
-                    const response = await fetch(`${this.scriptUrl}?action=getEmployees`);
-                    const result = await response.json();
+                    const result = await this.makeRequest(`${this.scriptUrl}?action=getEmployees`);
                     console.log('Employee response:', result);
                     return result.data || [];
                 } catch (error) {
@@ -189,20 +217,60 @@
                 }
             }
 
+            async saveTimecard(data) {
+                try {
+                    console.log('Saving timecard data:', data);
+                    const result = await this.makeRequest(this.scriptUrl, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ action: 'saveTimecard', data: data })
+                    });
+                    console.log('Save response:', result);
+                    return result;
+                } catch (error) {
+                    console.error('Error saving timecard:', error);
+                    throw new Error('Failed to save timecard: ' + error.message);
+                }
+            }
+
             async submitTimecard(data) {
                 try {
                     console.log('Submitting timecard data:', data);
-                    const response = await fetch(this.scriptUrl, {
+                    const result = await this.makeRequest(this.scriptUrl, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
                         body: JSON.stringify({ action: 'submitTimecard', data: data })
                     });
-                    const result = await response.json();
                     console.log('Submit response:', result);
                     return result;
                 } catch (error) {
                     console.error('Error submitting timecard:', error);
                     throw new Error('Failed to submit timecard: ' + error.message);
+                }
+            }
+
+            // Alternative method using GET with URL parameters for testing
+            async submitTimecardViaGet(data) {
+                try {
+                    const params = new URLSearchParams();
+                    params.append('action', 'submitTimecard');
+                    params.append('data', JSON.stringify(data));
+                    
+                    const url = `${this.scriptUrl}?${params.toString()}`;
+                    console.log('Submitting via GET:', url);
+                    
+                    const result = await this.makeRequest(url);
+                    console.log('GET Submit response:', result);
+                    return result;
+                } catch (error) {
+                    console.error('Error submitting timecard via GET:', error);
+                    throw new Error('Failed to submit timecard via GET: ' + error.message);
                 }
             }
         }
@@ -604,7 +672,7 @@
             if (totalPaySummaryElement) totalPaySummaryElement.textContent = `$${totalPay.toFixed(2)}`;
         }
 
-        async function submitTimecard() {
+        async function saveTimecard() {
             if (!currentEmployee) {
                 showError('No employee selected');
                 return;
@@ -620,14 +688,49 @@
             document.getElementById('errorMessage').style.display = 'none';
             document.getElementById('successMessage').style.display = 'none';
 
+            const timecardData = collectTimecardData(weekStarting, 'saved');
+
+            console.log('Saving timecard data:', timecardData);
+
+            try {
+                // Change button text to show loading
+                const saveBtn = event.target;
+                const originalText = saveBtn.textContent;
+                saveBtn.textContent = 'Saving...';
+                saveBtn.disabled = true;
+
+                const result = await database.saveTimecard(timecardData);
+                
+                console.log('Save result:', result);
+                
+                if (result.success) {
+                    showSuccess('Timecard saved successfully! You can continue editing and save again or submit when ready.');
+                } else {
+                    showError('Failed to save timecard: ' + (result.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                showError('Error saving timecard: ' + error.message);
+            } finally {
+                // Reset button
+                const saveBtn = document.querySelector('button[onclick="saveTimecard()"]');
+                if (saveBtn) {
+                    saveBtn.textContent = 'Save Progress';
+                    saveBtn.disabled = false;
+                }
+            }
+        }
+
+        function collectTimecardData(weekStarting, status = 'pending') {
             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
             const timecardData = {
                 employee_id: currentEmployee.id,
                 employee_name: currentEmployee.name,
                 week_starting: weekStarting,
-                status: 'pending',
+                status: status,
                 submitted_date: new Date().toISOString().split('T')[0],
-                submitted_time: new Date().toLocaleTimeString()
+                submitted_time: new Date().toLocaleTimeString(),
+                last_updated: new Date().toISOString()
             };
 
             // Collect all the timecard data
@@ -674,10 +777,32 @@
                 
                 timecardData[`total_${category.id}_hours`] = categoryHours;
                 timecardData[`total_${category.id}_pay`] = categoryPay;
+                timecardData[`rate_${category.id}`] = rate;
             });
             
             timecardData.total_hours = totalHours;
             timecardData.total_pay = totalPay;
+
+            return timecardData;
+        }
+
+        async function submitTimecard() {
+            if (!currentEmployee) {
+                showError('No employee selected');
+                return;
+            }
+
+            const weekStarting = document.getElementById('weekStarting').value;
+            if (!weekStarting) {
+                showError('Please select a week starting date');
+                return;
+            }
+
+            // Hide previous messages
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+
+            const timecardData = collectTimecardData(weekStarting, 'submitted');
 
             console.log('Submitting timecard data:', timecardData);
 
@@ -688,22 +813,41 @@
                 submitBtn.textContent = 'Submitting...';
                 submitBtn.disabled = true;
 
-                const result = await database.submitTimecard(timecardData);
+                let result;
+                try {
+                    // Try POST method first
+                    result = await database.submitTimecard(timecardData);
+                } catch (postError) {
+                    console.warn('POST method failed, trying GET method:', postError);
+                    // Fallback to GET method if POST fails
+                    result = await database.submitTimecardViaGet(timecardData);
+                }
                 
                 console.log('Submit result:', result);
                 
                 if (result.success) {
-                    showSuccess('Timecard submitted successfully!');
+                    showSuccess('Timecard submitted successfully! Your timecard has been recorded.');
                     // Optionally clear the form or redirect
                     setTimeout(() => {
                         goBackToEmployeeList();
-                    }, 2000);
+                    }, 3000);
                 } else {
                     showError('Failed to submit timecard: ' + (result.message || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Submit error:', error);
-                showError('Error submitting timecard: ' + error.message);
+                
+                // Provide more specific error messages
+                let errorMessage = 'Error submitting timecard: ';
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage += 'Unable to connect to the server. Please check your internet connection and try again. If the problem persists, your Google Apps Script may need to be redeployed.';
+                } else if (error.message.includes('timed out')) {
+                    errorMessage += 'The request timed out. Please try again.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showError(errorMessage);
             } finally {
                 // Reset button
                 const submitBtn = document.querySelector('button[onclick="submitTimecard()"]');
