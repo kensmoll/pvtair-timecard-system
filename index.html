@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PVTAIR - Smart Timecard Submission</title>
+    <title>PVTAIR - Timecard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -19,20 +15,18 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
             border-radius: 20px;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
             overflow: hidden;
-            border: 1px solid rgba(168, 168, 168, 0.3);
         }
         
         .header {
             background: linear-gradient(135deg, #1A1A1A 0%, #333333 50%, #4A4A4A 100%);
             color: white;
-            padding: 25px 30px;
+            padding: 25px;
             text-align: center;
         }
         
@@ -41,115 +35,18 @@
             font-size: 2.5em;
             font-weight: 300;
             margin-bottom: 8px;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
             letter-spacing: 5px;
-            font-family: 'Arial', sans-serif;
         }
         
-        .page-title {
-            font-size: 2em;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: white;
-        }
-        
-        .page-subtitle {
-            font-size: 1.2em;
-            opacity: 0.9;
-            color: #CCCCCC;
-        }
-        
-        .content {
-            padding: 30px;
-            background: linear-gradient(135deg, #FAFAFA, #F8FAFC);
-        }
-        
-        .employee-selector {
-            background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
-            border: 2px solid #A5B4FC;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .employee-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .employee-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            border: 2px solid #E5E5E5;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-        
-        .employee-card:hover {
-            border-color: #7C3AED;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.2);
-        }
-        
-        .employee-name {
-            font-size: 1.3em;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-        
-        .employee-details {
-            color: #6b7280;
-            font-size: 0.9em;
-            line-height: 1.4;
-        }
-        
-        .timecard-form {
-            display: none;
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        .timecard-form.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .form-header {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
+        .content { padding: 30px; }
         
         .employee-info {
-            background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
-            border: 2px solid #BBF7D0;
+            background: #f0fdf4;
+            border: 2px solid #bbf7d0;
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
-        }
-        
-        .pay-structure {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            font-size: 0.9em;
-        }
-        
-        .pay-item {
-            color: #166534;
-            font-weight: 500;
+            text-align: center;
         }
         
         .week-selector {
@@ -160,24 +57,12 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         
-        .daily-entries {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        
         .day-entry {
+            background: white;
             border: 2px solid #e5e7eb;
             border-radius: 12px;
             padding: 20px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-        
-        .day-entry:hover {
-            border-color: #7c3aed;
+            margin-bottom: 15px;
         }
         
         .day-header {
@@ -185,79 +70,73 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
-            padding-bottom: 10px;
             border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 10px;
         }
         
-        .day-header h5 {
-            color: #1f2937;
-            font-size: 1.1em;
-            font-weight: 600;
-            margin: 0;
-        }
-        
-        .day-date {
-            color: #6b7280;
-            font-size: 0.9em;
-        }
-        
-        .activity-fields {
+        .activity-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
         
-        .activity-group {
-            display: flex;
-            flex-direction: column;
+        .activity-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
         }
         
-        .activity-group label {
+        .activity-label {
             font-weight: 600;
+            margin-bottom: 10px;
             color: #374151;
-            margin-bottom: 5px;
-            font-size: 0.9em;
         }
         
-        .activity-input {
-            padding: 8px 12px;
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .hours-input {
+            width: 100%;
+            padding: 8px;
             border: 2px solid #e5e7eb;
             border-radius: 6px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        
-        .activity-input:focus {
-            outline: none;
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+            margin-bottom: 10px;
         }
         
         .pay-display {
-            background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
-            padding: 8px 12px;
+            background: #f0fdf4;
+            padding: 8px;
             border-radius: 6px;
-            border: 1px solid #BBF7D0;
+            text-align: center;
             font-weight: bold;
             color: #166534;
-            text-align: center;
         }
         
         .day-total {
-            background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
-            border: 2px solid #C7D2FE;
+            background: #eef2ff;
+            border: 2px solid #c7d2fe;
             border-radius: 8px;
-            padding: 12px;
+            padding: 15px;
             margin-top: 15px;
             text-align: center;
+            font-weight: bold;
         }
         
         .week-summary {
             background: white;
             border-radius: 15px;
             padding: 25px;
+            margin: 20px 0;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
         }
         
         .summary-grid {
@@ -274,26 +153,6 @@
             border: 2px solid #e5e7eb;
         }
         
-        .summary-value {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #7c3aed;
-            margin-bottom: 5px;
-        }
-        
-        .summary-label {
-            color: #6b7280;
-            font-size: 0.9em;
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 30px;
-            flex-wrap: wrap;
-        }
-        
         .btn {
             background: linear-gradient(135deg, #7c3aed, #5b21b6);
             color: white;
@@ -302,166 +161,72 @@
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 16px;
-            min-width: 150px;
+            margin: 10px;
         }
         
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
-        }
+        .btn:hover { transform: translateY(-2px); }
         
-        .btn-secondary {
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-        }
-        
-        .back-button {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 1000;
-            text-decoration: none;
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-weight: 500;
-        }
-        
-        .alert-success {
-            background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
-            color: #065F46;
-            border: 2px solid #A7F3D0;
-        }
-        
-        .alert-error {
-            background: linear-gradient(135deg, #FEF2F2, #FECACA);
-            color: #991B1B;
-            border: 2px solid #FECACA;
-        }
-        
-        .alert-info {
-            background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
-            color: #1E40AF;
-            border: 2px solid #BFDBFE;
-        }
-        
-        @media (max-width: 768px) {
-            .employee-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .activity-fields {
-                grid-template-columns: 1fr;
-            }
-            
-            .summary-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+        .loading { text-align: center; padding: 50px; color: #6b7280; }
+        .error { background: #fef2f2; color: #991b1b; padding: 20px; border-radius: 8px; margin: 20px 0; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="company-name">PVTAIR</div>
-            <div class="page-title">Smart Timecard Submission</div>
-            <div class="page-subtitle">Employee-specific timecard with real-time pay calculations</div>
+            <h1 id="pageTitle">Employee Timecard</h1>
         </div>
         
         <div class="content">
-            <!-- Employee Selection -->
-            <div class="employee-selector" id="employeeSelector">
-                <h3>Select Your Employee Profile</h3>
-                <p style="color: #6B7280; margin-bottom: 15px;">
-                    Choose your name to load your personalized timecard with pay rates and categories.
-                </p>
-                <div class="employee-grid" id="employeeGrid">
-                    <div class="loading-message">Loading employees from Google Sheets...</div>
-                </div>
-            </div>
+            <div id="loadingMessage" class="loading">Loading employee data...</div>
+            <div id="errorMessage" class="error" style="display: none;"></div>
             
-            <!-- Smart Timecard Form -->
-            <div class="timecard-form" id="timecardForm">
-                <!-- Employee Info & Pay Structure -->
-                <div class="form-header">
-                    <h2 id="employeeName">Employee Timecard</h2>
-                    <div class="employee-info">
-                        <h4 style="color: #166534; margin-bottom: 10px;">Your Pay Structure</h4>
-                        <div class="pay-structure" id="payStructure">
-                            <!-- Dynamically populated with employee's rates -->
-                        </div>
-                    </div>
+            <div id="timecardForm" style="display: none;">
+                <div class="employee-info">
+                    <h2 id="employeeName"></h2>
+                    <div id="payRates"></div>
                 </div>
-
-                <!-- Week Selection -->
+                
                 <div class="week-selector">
-                    <label for="weekStarting" style="font-weight: 600; margin-right: 15px;">Week Starting:</label>
-                    <input type="date" id="weekStarting" class="activity-input" style="width: 200px;">
+                    <label for="weekStarting">Week Starting:</label>
+                    <input type="date" id="weekStarting">
                 </div>
-
-                <!-- Daily Activity Entries -->
-                <div class="daily-entries">
-                    <h3 style="margin-bottom: 20px; color: #1f2937;">Weekly Activity Log</h3>
-                    
-                    <!-- Days will be dynamically generated based on employee's pay structure -->
-                    <div id="dailyEntriesContainer">
-                        <!-- Populated by JavaScript -->
-                    </div>
-                </div>
-
-                <!-- Week Summary -->
+                
+                <div id="dailyEntries"></div>
+                
                 <div class="week-summary">
-                    <h3 style="margin-bottom: 20px; color: #1f2937; text-align: center;">Weekly Summary</h3>
-                    <div class="summary-grid" id="weekSummary">
-                        <!-- Populated by JavaScript -->
-                    </div>
+                    <h3>Weekly Summary</h3>
+                    <div class="summary-grid" id="weekSummary"></div>
                 </div>
-
-                <!-- Form Actions -->
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="saveAsDraft()">
-                        Save as Draft
-                    </button>
-                    <button type="button" class="btn" onclick="submitTimecard()">
-                        Submit for Approval
-                    </button>
+                
+                <div style="text-align: center;">
+                    <button class="btn" onclick="submitTimecard()">Submit Timecard</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <a href="../" class="back-button">← Back to Dashboard</a>
-
     <script src="../assets/js/database.js"></script>
     <script>
-        // Global variables
-        let employees = [];
         let currentEmployee = null;
         let payCategories = [
-            { id: 'revFlight', label: 'Revenue Flight', rateField: 'rateRevFlight' },
-            { id: 'nonRevFlightExc', label: 'Non-Rev Flight EXC', rateField: 'rateNonRevFlightExc' },
-            { id: 'nonRevNonFlight', label: 'Non-Rev Non-Flight', rateField: 'rateNonRevNonFlight' },
-            { id: 'mxHours', label: 'Maintenance', rateField: 'rateMxHourly' },
-            { id: 'adminHours', label: 'Admin', rateField: 'rateAdminHourly' }
+            { id: 'rev_flight', label: 'Revenue Flight', rateField: 'rate_rev_flight', type: 'radio' },
+            { id: 'non_rev_flight_exc', label: 'Non-Rev Flight EXC', rateField: 'rate_non_rev_flight_exc', type: 'radio' },
+            { id: 'non_rev_non_flight', label: 'Non-Rev Non-Flight', rateField: 'rate_non_rev_non_flight', type: 'radio' },
+            { id: 'mx_hourly', label: 'Maintenance', rateField: 'rate_mx_hourly', type: 'hours' },
+            { id: 'admin_hourly', label: 'Admin', rateField: 'rate_admin_hourly', type: 'hours' }
         ];
-        let weeklyData = {};
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Smart timecard system loaded');
-            loadEmployeesFromGoogleSheets();
+            const urlParams = new URLSearchParams(window.location.search);
+            const employeeId = urlParams.get('employee');
+            
+            if (employeeId) {
+                loadEmployeeTimecard(employeeId);
+            } else {
+                showError('No employee ID provided in URL');
+            }
+            
             setupWeekDefault();
         });
 
@@ -472,103 +237,57 @@
             document.getElementById('weekStarting').value = monday.toISOString().split('T')[0];
         }
 
-        async function loadEmployeesFromGoogleSheets() {
+        async function loadEmployeeTimecard(employeeId) {
             try {
-                employees = await database.getEmployees();
-                console.log('Employees loaded:', employees);
-                generateEmployeeGrid();
-            } catch (error) {
-                console.error('Error loading employees:', error);
-                showAlert('Failed to load employees from Google Sheets', 'error');
-            }
-        }
-
-        function generateEmployeeGrid() {
-            const grid = document.getElementById('employeeGrid');
-            
-            if (!employees || employees.length === 0) {
-                grid.innerHTML = '<div class="alert-error">No employees found in Google Sheets.</div>';
-                return;
-            }
-
-            grid.innerHTML = employees.map(employee => {
-                // Calculate which pay categories this employee has
-                const activeCategories = payCategories.filter(cat => 
-                    employee[cat.rateField] && parseFloat(employee[cat.rateField]) > 0
-                );
+                const employees = await database.getEmployees();
+                currentEmployee = employees.find(emp => emp.id === employeeId);
                 
-                const hasBaseSalary = employee.baseSalary && parseFloat(employee.baseSalary) > 0;
-
-                return `
-                    <div class="employee-card" onclick="selectEmployee('${employee.id}')">
-                        <div class="employee-name">${employee.name}</div>
-                        <div class="employee-details">
-                            <strong>ID:</strong> ${employee.id}<br>
-                            ${hasBaseSalary ? `<strong>Base Salary:</strong> $${parseFloat(employee.baseSalary).toLocaleString()}<br>` : ''}
-                            <strong>Pay Categories:</strong> ${activeCategories.length}<br>
-                            <small>${activeCategories.map(c => c.label).join(', ')}</small>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function selectEmployee(employeeId) {
-            currentEmployee = employees.find(emp => emp.id === employeeId);
-            if (!currentEmployee) {
-                showAlert('Employee not found', 'error');
-                return;
+                if (!currentEmployee) {
+                    showError('Employee not found');
+                    return;
+                }
+                
+                setupTimecardForm();
+                
+            } catch (error) {
+                showError('Failed to load employee data: ' + error.message);
             }
-
-            console.log('Selected employee:', currentEmployee);
-            
-            // Hide selector, show form
-            document.getElementById('employeeSelector').style.display = 'none';
-            document.getElementById('timecardForm').classList.add('active');
-            
-            // Setup employee-specific form
-            setupEmployeeForm();
         }
 
-        function setupEmployeeForm() {
-            // Update header
-            document.getElementById('employeeName').textContent = `${currentEmployee.name} - Weekly Timecard`;
+        function setupTimecardForm() {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('timecardForm').style.display = 'block';
             
-            // Show pay structure
-            displayPayStructure();
+            document.getElementById('employeeName').textContent = currentEmployee.name;
+            document.getElementById('pageTitle').textContent = `${currentEmployee.name} - Timecard`;
             
-            // Generate daily entries
+            displayPayRates();
             generateDailyEntries();
-            
-            // Setup calculations
             setupCalculations();
         }
 
-        function displayPayStructure() {
-            const container = document.getElementById('payStructure');
+        function displayPayRates() {
+            const container = document.getElementById('payRates');
+            let ratesHTML = '';
             
-            // Show base salary if exists
-            let structureHTML = '';
-            if (currentEmployee.baseSalary && parseFloat(currentEmployee.baseSalary) > 0) {
-                structureHTML += `<div class="pay-item">Base Salary: $${parseFloat(currentEmployee.baseSalary).toLocaleString()}/year</div>`;
+            if (currentEmployee.base_salary && parseFloat(currentEmployee.base_salary) > 0) {
+                ratesHTML += `Base Salary: $${parseFloat(currentEmployee.base_salary).toLocaleString()}/year<br>`;
             }
             
-            // Show active pay categories with rates
             payCategories.forEach(category => {
                 const rate = currentEmployee[category.rateField];
                 if (rate && parseFloat(rate) > 0) {
-                    structureHTML += `<div class="pay-item">${category.label}: $${parseFloat(rate).toFixed(2)}/hour</div>`;
+                    ratesHTML += `${category.label}: $${parseFloat(rate).toFixed(2)}/hour<br>`;
                 }
             });
-
-            container.innerHTML = structureHTML;
+            
+            container.innerHTML = ratesHTML;
         }
 
         function generateDailyEntries() {
-            const container = document.getElementById('dailyEntriesContainer');
+            const container = document.getElementById('dailyEntries');
             const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
             
-            // Get active categories for this employee
             const activeCategories = payCategories.filter(cat => 
                 currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
             );
@@ -581,45 +300,63 @@
                 entriesHTML += `
                     <div class="day-entry">
                         <div class="day-header">
-                            <h5>${day}</h5>
-                            <span class="day-date" id="${dayLower}Date"></span>
+                            <h4>${day}</h4>
+                            <span id="${dayLower}Date"></span>
                         </div>
-                        <div class="activity-fields">
+                        <div class="activity-grid">
                 `;
 
-                // Add fields for each active category
                 activeCategories.forEach(category => {
                     const rate = parseFloat(currentEmployee[category.rateField]);
+                    
                     entriesHTML += `
-                        <div class="activity-group">
-                            <label>${category.label} (Hours)</label>
-                            <input type="number" 
-                                   id="${dayLower}${category.id}" 
-                                   class="activity-input activity-calc" 
+                        <div class="activity-item">
+                            <div class="activity-label">${category.label}</div>
+                    `;
+                    
+                    if (category.type === 'radio') {
+                        entriesHTML += `
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" name="${dayLower}_${category.id}" value="0" checked 
+                                           data-day="${dayLower}" data-category="${category.id}" data-rate="${rate}">
+                                    <label>0</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="${dayLower}_${category.id}" value="0.5"
+                                           data-day="${dayLower}" data-category="${category.id}" data-rate="${rate}">
+                                    <label>0.5</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" name="${dayLower}_${category.id}" value="1"
+                                           data-day="${dayLower}" data-category="${category.id}" data-rate="${rate}">
+                                    <label>1</label>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        entriesHTML += `
+                            <input type="number" class="hours-input" 
+                                   id="${dayLower}_${category.id}" 
                                    min="0" max="24" step="0.1" value="0"
-                                   data-day="${dayLower}" 
-                                   data-category="${category.id}"
-                                   data-rate="${rate}">
-                        </div>
-                        <div class="activity-group">
-                            <label>Pay ($${rate.toFixed(2)}/hr)</label>
-                            <div class="pay-display" id="${dayLower}${category.id}Pay">$0.00</div>
+                                   data-day="${dayLower}" data-category="${category.id}" data-rate="${rate}">
+                        `;
+                    }
+                    
+                    entriesHTML += `
+                            <div class="pay-display" id="${dayLower}_${category.id}_pay">$0.00</div>
                         </div>
                     `;
                 });
 
                 entriesHTML += `
                         </div>
-                        <div class="day-total">
-                            <strong>Daily Total: <span id="${dayLower}Total">$0.00</span></strong>
-                        </div>
+                        <div class="day-total">Daily Total: <span id="${dayLower}_total">$0.00</span></div>
                     </div>
                 `;
             });
 
             container.innerHTML = entriesHTML;
-            
-            // Update day dates
             updateDayDates();
         }
 
@@ -635,15 +372,12 @@
         }
 
         function setupCalculations() {
-            // Add event listeners to all activity inputs
-            document.querySelectorAll('.activity-calc').forEach(input => {
+            document.querySelectorAll('input[type="radio"], input[type="number"]').forEach(input => {
+                input.addEventListener('change', calculateTotals);
                 input.addEventListener('input', calculateTotals);
             });
-
-            // Week starting change updates dates
-            document.getElementById('weekStarting').addEventListener('change', updateDayDates);
             
-            // Generate initial summary
+            document.getElementById('weekStarting').addEventListener('change', updateDayDates);
             generateWeekSummary();
         }
 
@@ -651,7 +385,6 @@
             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
             let weeklyTotals = {};
             
-            // Initialize weekly totals
             payCategories.forEach(cat => {
                 weeklyTotals[cat.id] = { hours: 0, pay: 0 };
             });
@@ -660,70 +393,74 @@
                 let dayTotal = 0;
 
                 payCategories.forEach(category => {
-                    const input = document.getElementById(`${day}${category.id}`);
-                    const payDisplay = document.getElementById(`${day}${category.id}Pay`);
+                    if (!currentEmployee[category.rateField] || parseFloat(currentEmployee[category.rateField]) <= 0) return;
                     
-                    if (input && payDisplay) {
-                        const hours = parseFloat(input.value) || 0;
-                        const rate = parseFloat(input.dataset.rate) || 0;
-                        const pay = hours * rate;
-                        
-                        // Update individual pay display
-                        payDisplay.textContent = `$${pay.toFixed(2)}`;
-                        
-                        // Add to daily total
-                        dayTotal += pay;
-                        
-                        // Add to weekly totals
-                        weeklyTotals[category.id].hours += hours;
-                        weeklyTotals[category.id].pay += pay;
+                    const rate = parseFloat(currentEmployee[category.rateField]);
+                    let hours = 0;
+                    
+                    if (category.type === 'radio') {
+                        const selectedRadio = document.querySelector(`input[name="${day}_${category.id}"]:checked`);
+                        if (selectedRadio) {
+                            hours = parseFloat(selectedRadio.value);
+                        }
+                    } else {
+                        const hoursInput = document.getElementById(`${day}_${category.id}`);
+                        if (hoursInput) {
+                            hours = parseFloat(hoursInput.value) || 0;
+                        }
                     }
+                    
+                    const pay = hours * rate;
+                    
+                    const payDisplay = document.getElementById(`${day}_${category.id}_pay`);
+                    if (payDisplay) {
+                        payDisplay.textContent = `$${pay.toFixed(2)}`;
+                    }
+                    
+                    dayTotal += pay;
+                    weeklyTotals[category.id].hours += hours;
+                    weeklyTotals[category.id].pay += pay;
                 });
 
-                // Update daily total
-                const dayTotalElement = document.getElementById(`${day}Total`);
+                const dayTotalElement = document.getElementById(`${day}_total`);
                 if (dayTotalElement) {
                     dayTotalElement.textContent = `$${dayTotal.toFixed(2)}`;
                 }
             });
 
-            // Update weekly summary
             updateWeekSummary(weeklyTotals);
         }
 
         function generateWeekSummary() {
             const container = document.getElementById('weekSummary');
             
-            // Get active categories
             const activeCategories = payCategories.filter(cat => 
                 currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
             );
 
             let summaryHTML = '';
 
-            // Category summaries
             activeCategories.forEach(category => {
                 summaryHTML += `
                     <div class="summary-item">
-                        <div class="summary-value" id="week${category.id}Hours">0.0</div>
-                        <div class="summary-label">${category.label} Hours</div>
+                        <div id="week_${category.id}_hours">0.0</div>
+                        <div>${category.label} Hours</div>
                     </div>
                     <div class="summary-item">
-                        <div class="summary-value" id="week${category.id}Pay">$0.00</div>
-                        <div class="summary-label">${category.label} Pay</div>
+                        <div id="week_${category.id}_pay">$0.00</div>
+                        <div>${category.label} Pay</div>
                     </div>
                 `;
             });
 
-            // Total summary
             summaryHTML += `
-                <div class="summary-item" style="background: #f0fdf4; border-color: #bbf7d0;">
-                    <div class="summary-value" id="weekTotalHours" style="color: #166534;">0.0</div>
-                    <div class="summary-label">Total Hours</div>
+                <div class="summary-item" style="background: #f0fdf4;">
+                    <div id="week_total_hours">0.0</div>
+                    <div>Total Hours</div>
                 </div>
-                <div class="summary-item" style="background: #f0fdf4; border-color: #bbf7d0;">
-                    <div class="summary-value" id="weekTotalPay" style="color: #166534;">$0.00</div>
-                    <div class="summary-label">Total Pay</div>
+                <div class="summary-item" style="background: #f0fdf4;">
+                    <div id="week_total_pay">$0.00</div>
+                    <div>Total Pay</div>
                 </div>
             `;
 
@@ -734,10 +471,9 @@
             let totalHours = 0;
             let totalPay = 0;
 
-            // Update category totals
             Object.keys(totals).forEach(categoryId => {
-                const hoursElement = document.getElementById(`week${categoryId}Hours`);
-                const payElement = document.getElementById(`week${categoryId}Pay`);
+                const hoursElement = document.getElementById(`week_${categoryId}_hours`);
+                const payElement = document.getElementById(`week_${categoryId}_pay`);
                 
                 if (hoursElement && payElement) {
                     hoursElement.textContent = totals[categoryId].hours.toFixed(1);
@@ -748,76 +484,60 @@
                 }
             });
 
-            // Update grand totals
-            const totalHoursElement = document.getElementById('weekTotalHours');
-            const totalPayElement = document.getElementById('weekTotalPay');
+            const totalHoursElement = document.getElementById('week_total_hours');
+            const totalPayElement = document.getElementById('week_total_pay');
             
             if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
             if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(2)}`;
         }
 
         async function submitTimecard() {
-            if (!currentEmployee) {
-                showAlert('No employee selected', 'error');
-                return;
-            }
-
-            // Collect timecard data
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
             const timecardData = {
-                employeeId: currentEmployee.id,
-                employeeName: currentEmployee.name,
-                weekStarting: document.getElementById('weekStarting').value,
+                employee_id: currentEmployee.id,
+                week_starting: document.getElementById('weekStarting').value,
                 status: 'pending',
-                submittedAt: new Date().toISOString()
+                submitted_date: new Date().toISOString()
             };
 
-            // Collect daily data
-            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
             days.forEach(day => {
-                const dayData = {};
                 payCategories.forEach(category => {
-                    const input = document.getElementById(`${day}${category.id}`);
-                    if (input) {
-                        dayData[category.id] = parseFloat(input.value) || 0;
+                    if (!currentEmployee[category.rateField] || parseFloat(currentEmployee[category.rateField]) <= 0) return;
+                    
+                    let hours = 0;
+                    
+                    if (category.type === 'radio') {
+                        const selectedRadio = document.querySelector(`input[name="${day}_${category.id}"]:checked`);
+                        if (selectedRadio) {
+                            hours = parseFloat(selectedRadio.value);
+                        }
+                    } else {
+                        const hoursInput = document.getElementById(`${day}_${category.id}`);
+                        if (hoursInput) {
+                            hours = parseFloat(hoursInput.value) || 0;
+                        }
                     }
+                    
+                    timecardData[`${day}_${category.id}`] = hours;
                 });
-                timecardData[day] = dayData;
             });
 
             try {
-                showAlert('Submitting timecard...', 'info');
                 const result = await database.submitTimecard(timecardData);
-                
                 if (result.success) {
-                    showAlert('Timecard submitted successfully!', 'success');
+                    alert('Timecard submitted successfully!');
                 } else {
-                    showAlert(`Failed to submit: ${result.message}`, 'error');
+                    alert('Failed to submit: ' + result.message);
                 }
             } catch (error) {
-                showAlert('Error submitting timecard', 'error');
+                alert('Error submitting timecard: ' + error.message);
             }
         }
 
-        function saveAsDraft() {
-            showAlert('Draft functionality coming soon', 'info');
-        }
-
-        function showAlert(message, type = 'info') {
-            const existingAlerts = document.querySelectorAll('.alert');
-            existingAlerts.forEach(alert => alert.remove());
-            
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.textContent = message;
-            
-            const content = document.querySelector('.content');
-            content.insertBefore(alert, content.firstChild);
-            
-            setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.remove();
-                }
-            }, 5000);
+        function showError(message) {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
         }
     </script>
 </body>
