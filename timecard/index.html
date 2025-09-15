@@ -786,18 +786,28 @@
                 });
             });
             
-            // Calculate estimated pay
+            // Calculate estimated pay (only for categories with rates)
             let estimatedPay = currentEmployee.baseSalary || 0;
             
-            // Add daily rates
             if (currentEmployee.rates) {
-                estimatedPay += totals.revFlight * (currentEmployee.rates.revFlight || 0);
-                estimatedPay += totals.nonRevFlight * (currentEmployee.rates.nonRevFlightExc || 0);
-                estimatedPay += totals.nonRevNonFlight * (currentEmployee.rates.nonRevNonFlight || 0);
+                // Add daily rates (only if employee has these rates)
+                if (shouldShowCategory('revFlight', currentEmployee)) {
+                    estimatedPay += totals.revFlight * (currentEmployee.rates.revFlight || 0);
+                }
+                if (shouldShowCategory('nonRevFlight', currentEmployee)) {
+                    estimatedPay += totals.nonRevFlight * (currentEmployee.rates.nonRevFlightExc || 0);
+                }
+                if (shouldShowCategory('nonRevNonFlight', currentEmployee)) {
+                    estimatedPay += totals.nonRevNonFlight * (currentEmployee.rates.nonRevNonFlight || 0);
+                }
                 
-                // Add hourly rates
-                estimatedPay += totals.mx * (currentEmployee.rates.mxHourly || 0);
-                estimatedPay += totals.admin * (currentEmployee.rates.adminHourly || 0);
+                // Add hourly rates (only if employee has these rates)
+                if (shouldShowCategory('mx', currentEmployee)) {
+                    estimatedPay += totals.mx * (currentEmployee.rates.mxHourly || 0);
+                }
+                if (shouldShowCategory('admin', currentEmployee)) {
+                    estimatedPay += totals.admin * (currentEmployee.rates.adminHourly || 0);
+                }
             }
             
             const totalHours = Object.values(totals).reduce((sum, hours) => sum + hours, 0);
@@ -1012,7 +1022,7 @@
         window.database = {
             // Configuration - UPDATE YOUR API KEY HERE
             config: {
-                API_KEY: 'AIzaSyC5jWKcsb5LyYFHmGtOEEIAT6tIt0hPZs8', // ⚠️ REPLACE WITH YOUR ACTUAL API KEY
+                API_KEY: 'YOUR_GOOGLE_SHEETS_API_KEY_HERE', // ⚠️ REPLACE WITH YOUR ACTUAL API KEY
                 SPREADSHEET_ID: '1Jo39kWkJcNF-LEymNXmL8PgjipoEDvByyeI71YiElIs',
                 EMPLOYEES_RANGE: 'Employees!A:H',
                 TIMECARD_RANGE: 'Timecards!A:I',
