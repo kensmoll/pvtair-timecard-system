@@ -674,16 +674,15 @@ function updateDayDates() {
     const weekStartInput = document.getElementById('weekStarting');
     if (!weekStartInput || !weekStartInput.value) return;
     
-    // Parse the selected date (this should be a Sunday)
-    const selectedDate = new Date(weekStartInput.value + 'T12:00:00'); // Use noon to avoid timezone issues
+    const startDate = new Date(weekStartInput.value);
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     
     days.forEach((day, index) => {
         const dateElement = document.getElementById(`${day}Date`);
         if (dateElement) {
-            const currentDayDate = new Date(selectedDate);
-            currentDayDate.setDate(selectedDate.getDate() + index);
-            dateElement.textContent = (currentDayDate.getMonth() + 1) + '/' + currentDayDate.getDate() + '/' + currentDayDate.getFullYear();
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + index);
+            dateElement.textContent = currentDate.toLocaleDateString();
         }
     });
     
