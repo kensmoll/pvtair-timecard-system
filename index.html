@@ -734,7 +734,6 @@ console.log(`Rate for ${category.label}:`, rate, `Field: ${category.rateField}`)
 
         function calculateTotals() {
             if (!currentEmployee) return;
-            console.log('calculateTotals() called, weeklyTotals will be:', weeklyTotals);
             
             const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
             let weeklyTotals = {};
@@ -742,6 +741,8 @@ console.log(`Rate for ${category.label}:`, rate, `Field: ${category.rateField}`)
             payCategories.forEach(cat => {
                 weeklyTotals[cat.id] = { hours: 0, pay: 0 };
             });
+
+                        console.log('calculateTotals() called, weeklyTotals will be:', weeklyTotals);
 
             const activeCategories = payCategories.filter(cat => 
                 currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
