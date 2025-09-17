@@ -430,10 +430,12 @@ async function updateMonthlySummary() {
     const firstDay = new Date(currentYear, currentMonth, 1);
     const lastDay = new Date(currentYear, currentMonth + 1, 0);
     
-    // Find the first Sunday of the month (or before if month doesn't start on Sunday)
-    let currentSunday = new Date(firstDay);
+    // Find the first Sunday that affects this month
+let currentSunday = new Date(firstDay);
+// If the month starts on a day other than Sunday, find the previous Sunday
+if (currentSunday.getDay() !== 0) {
     currentSunday.setDate(currentSunday.getDate() - currentSunday.getDay());
-    
+}
     // Collect all Sundays that have days in this month
     while (currentSunday <= lastDay) {
         // Check if this Sunday's week has any days in the current month
@@ -454,7 +456,8 @@ async function updateMonthlySummary() {
     
     for (const sunday of sundaysInMonth) {
         try {
-            const weekString = sunday.toISOString().split('T')[0];
+const weekString = sunday.toISOString().split('T')[0];
+console.log('Trying to find data for week starting:', weekString);
             const result = await database.getExistingTimecard(currentEmployee.id, weekString);
             
 console.log('Checking week:', weekString, 'Result:', result.success, 'Has data:', !!result.data);
