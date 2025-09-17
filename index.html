@@ -685,7 +685,6 @@ function clearTimecardForm() {
             });
             
             calculateTotals();
-            updateMonthlySummary();
         }
 
         function setupTimecardForm() {
@@ -1027,6 +1026,9 @@ function generateMonthlySummary() {
             if (totalDaysElement) totalDaysElement.textContent = totalDays.toFixed(1);
             if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
             if (totalPayElement) totalPayElement.textContent = `${totalPay.toFixed(2)}`;
+              
+    // Update monthly summary after weekly calculations are complete
+    updateMonthlySummary();
         }
 
         function collectTimecardData(weekStarting, status = 'pending') {
