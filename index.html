@@ -492,13 +492,7 @@
                 }
                 
                 console.log('Current employee:', currentEmployee);
-                console.log('Employee rate fields:', {
-    rev_flight: currentEmployee.rate_rev_flight,
-    non_rev_exc: currentEmployee.rate_non_rev_flight_exc,
-    non_rev_non_flight: currentEmployee.rate_non_rev_non_flight,
-    mx_hourly: currentEmployee.rate_mx_hourly,
-    admin_hourly: currentEmployee.rate_admin_hourly
-});
+  
                 setupTimecardForm();
                 await loadExistingTimecard();
                 
@@ -638,7 +632,6 @@
 
                 activeCategories.forEach(category => {
   const rate = parseFloat(currentEmployee[category.rateField]) || 0;
-console.log(`Rate for ${category.label}:`, rate, `Field: ${category.rateField}`);
                     
                     html += `
                         <div class="category-item">
@@ -742,7 +735,6 @@ console.log(`Rate for ${category.label}:`, rate, `Field: ${category.rateField}`)
                 weeklyTotals[cat.id] = { hours: 0, pay: 0 };
             });
 
-                        console.log('calculateTotals() called, weeklyTotals will be:', weeklyTotals);
 
             const activeCategories = payCategories.filter(cat => 
                 currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
@@ -785,7 +777,6 @@ console.log(`Rate for ${category.label}:`, rate, `Field: ${category.rateField}`)
                 }
             });
 
-console.log('About to call updateWeekSummary with:', weeklyTotals);
             updateWeekSummary(weeklyTotals);
         }
 
@@ -799,8 +790,6 @@ console.log('About to call updateWeekSummary with:', weeklyTotals);
 
    activeCategories.forEach(category => {
     const hoursElement = document.getElementById(`week_${category.id}_hours_summary`);
-    console.log(`Looking for element: week_${category.id}_hours_summary`, hoursElement);
-    console.log(`Totals for ${category.id}:`, totals[category.id]);
     
     if (hoursElement && totals[category.id]) {
         hoursElement.textContent = totals[category.id].hours.toFixed(1);
@@ -812,8 +801,6 @@ console.log('About to call updateWeekSummary with:', weeklyTotals);
             const totalHoursElement = document.getElementById('week_total_hours_summary');
 const totalPayElement = document.getElementById('week_total_pay_summary');
 
-console.log('Total hours element:', totalHoursElement, 'Total pay element:', totalPayElement);
-console.log('Final totals - Hours:', totalHours, 'Pay:', totalPay);
 
 if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
 if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(2)}`;        }
