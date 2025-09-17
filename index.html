@@ -537,7 +537,7 @@ console.log('displayMonthlySummary called with:', JSON.stringify(totals, null, 2
 function enforceSunday() {
     const weekInput = document.getElementById('weekStarting');
     if (weekInput && weekInput.value) {
-        const selectedDate = new Date(weekInput.value + 'T00:00:00');
+        const selectedDate = new Date(weekInput.value);
         const sunday = new Date(selectedDate);
         sunday.setDate(selectedDate.getDate() - selectedDate.getDay());
         weekInput.value = sunday.toISOString().split('T')[0];
@@ -807,7 +807,7 @@ currentDate.setDate(currentDate.getDate() + index);
 loadExistingTimecard().then(() => {
     // Small delay to ensure all elements are rendered
     setTimeout(() => {
-        updateMonthlySummary();
+//        updateMonthlySummary();
     }, 100);
 });
         }
@@ -1037,7 +1037,7 @@ function generateMonthlySummary() {
             if (totalPayElement) totalPayElement.textContent = `${totalPay.toFixed(2)}`;
               
     // Update monthly summary after weekly calculations are complete
-    updateMonthlySummary();
+//    updateMonthlySummary();
         }
 
         function collectTimecardData(weekStarting, status = 'pending') {
