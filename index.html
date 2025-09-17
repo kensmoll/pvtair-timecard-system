@@ -211,7 +211,6 @@
         }
         
         .btn.save { background: linear-gradient(135deg, #059669, #047857); }
-        .btn.back { background: linear-gradient(135deg, #6b7280, #4b5563); }
         
         .button-row {
             display: flex;
@@ -278,7 +277,7 @@
                 </div>
                 
                 <div class="week-selector">
-<label for="weekStarting">Week Starting:</label>
+                    <label for="weekStarting">Week Starting (Sunday):</label>
                     <input type="date" id="weekStarting" onchange="updateDayDates()">
                 </div>
                 
@@ -344,63 +343,51 @@
 
             async getEmployees() {
                 try {
-                    console.log('Fetching employees...');
                     const result = await this.makeRequest(`${this.scriptUrl}?action=getEmployees`);
-                    console.log('Employee response:', result);
                     return result.data || [];
                 } catch (error) {
-                    console.error('Error fetching employees:', error);
                     throw new Error('Failed to load employees: ' + error.message);
                 }
             }
 
             async getExistingTimecard(employeeId, weekStarting) {
                 try {
-                    console.log('Getting existing timecard for:', employeeId, weekStarting);
                     const params = new URLSearchParams();
                     params.append('action', 'getExistingTimecard');
                     params.append('data', JSON.stringify({ employee_id: employeeId, week_starting: weekStarting }));
                     
                     const url = `${this.scriptUrl}?${params.toString()}`;
                     const result = await this.makeRequest(url);
-                    console.log('Existing timecard response:', result);
                     return result;
                 } catch (error) {
-                    console.error('Error getting existing timecard:', error);
                     throw new Error('Failed to get existing timecard: ' + error.message);
                 }
             }
 
             async saveTimecard(data) {
                 try {
-                    console.log('Saving timecard data:', data);
                     const params = new URLSearchParams();
                     params.append('action', 'saveTimecard');
                     params.append('data', JSON.stringify(data));
                     
                     const getUrl = `${this.scriptUrl}?${params.toString()}`;
                     const result = await this.makeRequest(getUrl);
-                    console.log('Save response:', result);
                     return result;
                 } catch (error) {
-                    console.error('Save failed:', error);
                     throw new Error('Failed to save timecard: ' + error.message);
                 }
             }
 
             async submitTimecard(data) {
                 try {
-                    console.log('Submitting timecard data:', data);
                     const params = new URLSearchParams();
                     params.append('action', 'submitTimecard');
                     params.append('data', JSON.stringify(data));
                     
                     const url = `${this.scriptUrl}?${params.toString()}`;
                     const result = await this.makeRequest(url);
-                    console.log('Submit response:', result);
                     return result;
                 } catch (error) {
-                    console.error('Error submitting timecard:', error);
                     throw new Error('Failed to submit timecard: ' + error.message);
                 }
             }
@@ -410,7 +397,6 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, initializing...');
             const urlParams = new URLSearchParams(window.location.search);
             const employeeId = urlParams.get('employee');
             
@@ -423,18 +409,37 @@
             setupWeekDefault();
         });
 
-    function setupWeekDefault() {
-    const today = new Date();
-    const weekInput = document.getElementById('weekStarting');
-    if (weekInput) {
-        weekInput.value = today.toISOString().split('T')[0];
-    }
-}
+        function setupWeekDefault() {
+            const today = new Date();
+            const sunday = new Date(today);
+            sunday.setDate(today.getDate() - today.getDay());
+            const weekInput = document.getElementById('weekStarting');
+            if (weekInput) {
+                weekInput.value = sunday.toISOString().split('T')[0];
+            }
+        }
+
+        function restrictToSundays() {
+            const weekInput = document.getElementById('weekStarting');
+            if (weekInput) {
+                weekInput.addEventListener('input', function() {
+                    const selectedDate = new Date(this.value);
+                    const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                    
+                    if (dayOfWeek !== 0) {
+                        // Find the previous Sunday
+                        const daysToSubtract = dayOfWeek;
+                        selectedDate.setDate(selectedDate.getDate() - daysToSubtract);
+                        this.value = selectedDate.toISOString().split('T')[0];
+                        updateDayDates();
+                    }
+                });
+            }
+        }
 
         async function loadEmployeeSelector() {
             try {
                 const employees = await database.getEmployees();
-                console.log('Loaded employees:', employees);
                 
                 if (employees.length === 0) {
                     showError('No employees found in Google Sheets');
@@ -445,7 +450,6 @@
                 showEmployeeSelection(employees);
                 
             } catch (error) {
-                console.error('Error loading employees:', error);
                 showError('Failed to load employees: ' + error.message);
             }
         }
@@ -469,17 +473,11 @@
         }
 
         function selectEmployee(employeeId) {
-            console.log('Selected employee:', employeeId);
             window.location.href = `?employee=${employeeId}`;
-        }
-
-        function goBackToEmployeeList() {
-            window.location.href = window.location.pathname;
         }
 
         async function loadEmployeeTimecard(employeeId) {
             try {
-                console.log('Loading timecard for employee:', employeeId);
                 const employees = await database.getEmployees();
                 currentEmployee = employees.find(emp => emp.id === employeeId);
                 
@@ -488,13 +486,10 @@
                     return;
                 }
                 
-                console.log('Current employee:', currentEmployee);
-  
                 setupTimecardForm();
                 await loadExistingTimecard();
                 
             } catch (error) {
-                console.error('Error loading employee timecard:', error);
                 showError('Failed to load employee data: ' + error.message);
             }
         }
@@ -506,15 +501,11 @@
                     return;
                 }
                 
-                console.log('Loading existing timecard for week:', weekStarting);
                 const result = await database.getExistingTimecard(currentEmployee.id, weekStarting);
                 
                 if (result.success && result.data) {
-                    console.log('Found existing timecard:', result.data);
                     populateFormWithExistingData(result.data);
                     showSuccess('Loaded existing timecard data for week of ' + weekStarting);
-                } else {
-                    console.log('No existing timecard found for this week');
                 }
             } catch (error) {
                 console.error('Error loading existing timecard:', error);
@@ -522,43 +513,31 @@
         }
 
         function populateFormWithExistingData(timecardData) {
-            console.log('Populating form with daily breakdown data:', timecardData);
-            
             const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
             const categories = ['rev_flight', 'non_rev_flight_exc', 'non_rev_non_flight', 'mx_hourly', 'admin_hourly'];
             
-            // Load daily data back into the correct day/category fields
             days.forEach(day => {
                 categories.forEach(category => {
                     const fieldName = `${day}_${category}`;
-                    console.log('Looking for field:', fieldName, 'Value:', timecardData[fieldName]);
                     
                     if (timecardData[fieldName] !== undefined && timecardData[fieldName] !== null) {
                         const value = parseFloat(timecardData[fieldName]) || 0;
                         
                         if (value > 0) {
-                            // Find the category info
                             const categoryInfo = payCategories.find(cat => cat.id === category);
-                            if (!categoryInfo) {
-                                console.log('Category not found:', category);
-                                return;
-                            }
+                            if (!categoryInfo) return;
                             
                             if (categoryInfo.type === 'radio') {
                                 const radioButtons = document.querySelectorAll(`input[name="${day}_${category}"]`);
                                 radioButtons.forEach(radio => {
                                     if (parseFloat(radio.value) === value) {
                                         radio.checked = true;
-                                        console.log(`✓ Set ${day} ${category} radio to:`, value);
                                     }
                                 });
                             } else if (categoryInfo.type === 'hours') {
                                 const input = document.getElementById(`${day}_${category}`);
                                 if (input) {
                                     input.value = value;
-                                    console.log(`✓ Set ${day} ${category} hours to:`, value);
-                                } else {
-                                    console.log(`✗ Input not found for ${day}_${category}`);
                                 }
                             }
                         }
@@ -566,8 +545,6 @@
                 });
             });
             
-            calculateTotals();
-            console.log('Form population with daily breakdown completed');
             calculateTotals();
         }
 
@@ -580,6 +557,7 @@
             
             displayPayRates();
             generateDailyEntries();
+            restrictToSundays();
         }
 
         function displayPayRates() {
@@ -622,13 +600,13 @@
                     <div class="day-row">
                         <div class="day-header">
                             <span>${day}</span>
-                     <span class="day-date" id="${dayLower}Date"></span>
+                            <span class="day-date" id="${dayLower}Date"></span>
                         </div>
                         <div class="categories-grid">
                 `;
 
                 activeCategories.forEach(category => {
-  const rate = parseFloat(currentEmployee[category.rateField]) || 0;
+                    const rate = parseFloat(currentEmployee[category.rateField]) || 0;
                     
                     html += `
                         <div class="category-item">
@@ -670,89 +648,90 @@
             calculateTotals();
         }
 
-function updateDayDates() {
-    const weekStartInput = document.getElementById('weekStarting');
-    if (!weekStartInput || !weekStartInput.value) return;
-    
-    const startDate = new Date(weekStartInput.value);
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    
-    days.forEach((day, index) => {
-        const dateElement = document.getElementById(`${day}Date`);
-        if (dateElement) {
-            const currentDate = new Date(startDate);
-            currentDate.setDate(startDate.getDate() + index);
-            dateElement.textContent = currentDate.toLocaleDateString();
+        function updateDayDates() {
+            const weekStartInput = document.getElementById('weekStarting');
+            if (!weekStartInput || !weekStartInput.value) return;
+            
+            const startDate = new Date(weekStartInput.value);
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            
+            days.forEach((day, index) => {
+                const dateElement = document.getElementById(`${day}Date`);
+                if (dateElement) {
+                    const currentDate = new Date(startDate);
+                    currentDate.setDate(startDate.getDate() + index);
+                    dateElement.textContent = currentDate.toLocaleDateString();
+                }
+            });
+            
+            loadExistingTimecard();
         }
-    });
-    
-    loadExistingTimecard();
-}
-    function generateWeekSummary() {
-    const container = document.getElementById('weekSummary');
-    
-    const activeCategories = payCategories.filter(cat => 
-        currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
-    );
 
-    // Determine what types of work this employee does
-    const hasRadioCategories = activeCategories.some(cat => cat.type === 'radio');
-    const hasHourlyCategories = activeCategories.some(cat => cat.type === 'hours');
+        function generateWeekSummary() {
+            const container = document.getElementById('weekSummary');
+            
+            const activeCategories = payCategories.filter(cat => 
+                currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
+            );
 
-    let summaryHTML = '';
+            // Determine what types of work this employee does
+            const hasRadioCategories = activeCategories.some(cat => cat.type === 'radio');
+            const hasHourlyCategories = activeCategories.some(cat => cat.type === 'hours');
 
-    // Add individual category summaries
-    activeCategories.forEach(category => {
-        const unit = category.type === 'radio' ? 'Days' : 'Hrs';
-        summaryHTML += `
-            <div class="summary-item">
-                <div class="summary-value" id="week_${category.id}_hours_summary">0.0</div>
-                <div>${category.label} ${unit}</div>
-            </div>
-        `;
-    });
+            let summaryHTML = '';
 
-    // Add total summaries based on what types of work they do
-    if (hasRadioCategories && hasHourlyCategories) {
-        // Has both - show both Total Days and Total Hours
-        summaryHTML += `
-            <div class="summary-item" style="background: #f0fdf4;">
-                <div class="summary-value" id="week_total_days_summary">0.0</div>
-                <div>Total Days</div>
-            </div>
-            <div class="summary-item" style="background: #f0fdf4;">
-                <div class="summary-value" id="week_total_hours_summary">0.0</div>
-                <div>Total Hours</div>
-            </div>
-        `;
-    } else if (hasRadioCategories) {
-        // Only radio categories - show Total Days
-        summaryHTML += `
-            <div class="summary-item" style="background: #f0fdf4;">
-                <div class="summary-value" id="week_total_days_summary">0.0</div>
-                <div>Total Days</div>
-            </div>
-        `;
-    } else if (hasHourlyCategories) {
-        // Only hourly categories - show Total Hours
-        summaryHTML += `
-            <div class="summary-item" style="background: #f0fdf4;">
-                <div class="summary-value" id="week_total_hours_summary">0.0</div>
-                <div>Total Hours</div>
-            </div>
-        `;
-    }
+            // Add individual category summaries
+            activeCategories.forEach(category => {
+                const unit = category.type === 'radio' ? 'Days' : 'Hrs';
+                summaryHTML += `
+                    <div class="summary-item">
+                        <div class="summary-value" id="week_${category.id}_hours_summary">0.0</div>
+                        <div>${category.label} ${unit}</div>
+                    </div>
+                `;
+            });
 
-    // Always show Total Pay
-    summaryHTML += `
-        <div class="summary-item" style="background: #f0fdf4;">
-            <div class="summary-value" id="week_total_pay_summary">$0.00</div>
-            <div>Total Pay</div>
-        </div>
-    `;
+            // Add total summaries based on what types of work they do
+            if (hasRadioCategories && hasHourlyCategories) {
+                // Has both - show both Total Days and Total Hours
+                summaryHTML += `
+                    <div class="summary-item" style="background: #f0fdf4;">
+                        <div class="summary-value" id="week_total_days_summary">0.0</div>
+                        <div>Total Days</div>
+                    </div>
+                    <div class="summary-item" style="background: #f0fdf4;">
+                        <div class="summary-value" id="week_total_hours_summary">0.0</div>
+                        <div>Total Hours</div>
+                    </div>
+                `;
+            } else if (hasRadioCategories) {
+                // Only radio categories - show Total Days
+                summaryHTML += `
+                    <div class="summary-item" style="background: #f0fdf4;">
+                        <div class="summary-value" id="week_total_days_summary">0.0</div>
+                        <div>Total Days</div>
+                    </div>
+                `;
+            } else if (hasHourlyCategories) {
+                // Only hourly categories - show Total Hours
+                summaryHTML += `
+                    <div class="summary-item" style="background: #f0fdf4;">
+                        <div class="summary-value" id="week_total_hours_summary">0.0</div>
+                        <div>Total Hours</div>
+                    </div>
+                `;
+            }
 
-    container.innerHTML = summaryHTML;
-}
+            // Always show Total Pay
+            summaryHTML += `
+                <div class="summary-item" style="background: #f0fdf4;">
+                    <div class="summary-value" id="week_total_pay_summary">$0.00</div>
+                    <div>Total Pay</div>
+                </div>
+            `;
+
+            container.innerHTML = summaryHTML;
+        }
 
         function calculateTotals() {
             if (!currentEmployee) return;
@@ -763,7 +742,6 @@ function updateDayDates() {
             payCategories.forEach(cat => {
                 weeklyTotals[cat.id] = { hours: 0, pay: 0 };
             });
-
 
             const activeCategories = payCategories.filter(cat => 
                 currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
@@ -792,7 +770,7 @@ function updateDayDates() {
                     
                     const payDisplay = document.getElementById(`${day}_${category.id}_pay`);
                     if (payDisplay) {
-                        payDisplay.textContent = `${pay.toFixed(2)}`;
+                        payDisplay.textContent = `$${pay.toFixed(2)}`;
                     }
                     
                     dayTotal += pay;
@@ -802,46 +780,46 @@ function updateDayDates() {
 
                 const dayTotalElement = document.getElementById(`${day}_total`);
                 if (dayTotalElement) {
-                    dayTotalElement.textContent = `Daily Total: ${dayTotal.toFixed(2)}`;
+                    dayTotalElement.textContent = `Daily Total: $${dayTotal.toFixed(2)}`;
                 }
             });
 
             updateWeekSummary(weeklyTotals);
         }
 
- function updateWeekSummary(totals) {
-    let totalHours = 0;
-    let totalDays = 0;
-    let totalPay = 0;
+        function updateWeekSummary(totals) {
+            let totalHours = 0;
+            let totalDays = 0;
+            let totalPay = 0;
 
-    const activeCategories = payCategories.filter(cat => 
-        currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
-    );
+            const activeCategories = payCategories.filter(cat => 
+                currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
+            );
 
-    activeCategories.forEach(category => {
-        const hoursElement = document.getElementById(`week_${category.id}_hours_summary`);
-        
-        if (hoursElement && totals[category.id]) {
-            hoursElement.textContent = totals[category.id].hours.toFixed(1);
+            activeCategories.forEach(category => {
+                const hoursElement = document.getElementById(`week_${category.id}_hours_summary`);
+                
+                if (hoursElement && totals[category.id]) {
+                    hoursElement.textContent = totals[category.id].hours.toFixed(1);
+                    
+                    if (category.type === 'radio') {
+                        totalDays += totals[category.id].hours;
+                    } else {
+                        totalHours += totals[category.id].hours;
+                    }
+                    totalPay += totals[category.id].pay;
+                }
+            });
+
+            // Update totals based on what elements exist
+            const totalDaysElement = document.getElementById('week_total_days_summary');
+            const totalHoursElement = document.getElementById('week_total_hours_summary');
+            const totalPayElement = document.getElementById('week_total_pay_summary');
             
-            if (category.type === 'radio') {
-                totalDays += totals[category.id].hours;
-            } else {
-                totalHours += totals[category.id].hours;
-            }
-            totalPay += totals[category.id].pay;
+            if (totalDaysElement) totalDaysElement.textContent = totalDays.toFixed(1);
+            if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
+            if (totalPayElement) totalPayElement.textContent = `${totalPay.toFixed(2)}`;
         }
-    });
-
-    // Update totals based on what elements exist
-    const totalDaysElement = document.getElementById('week_total_days_summary');
-    const totalHoursElement = document.getElementById('week_total_hours_summary');
-    const totalPayElement = document.getElementById('week_total_pay_summary');
-    
-    if (totalDaysElement) totalDaysElement.textContent = totalDays.toFixed(1);
-    if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
-    if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(2)}`;
-}
 
         function collectTimecardData(weekStarting, status = 'pending') {
             const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -939,7 +917,6 @@ function updateDayDates() {
                     showError('Failed to save timecard: ' + (result.message || 'Unknown error'));
                 }
             } catch (error) {
-                console.error('Save error:', error);
                 showError('Error saving timecard: ' + error.message);
             } finally {
                 const saveBtn = document.querySelector('button[onclick="saveTimecard()"]');
@@ -977,14 +954,10 @@ function updateDayDates() {
                 
                 if (result.success) {
                     showSuccess('Timecard submitted successfully!');
-                    setTimeout(() => {
-                        goBackToEmployeeList();
-                    }, 3000);
                 } else {
                     showError('Failed to submit timecard: ' + (result.message || 'Unknown error'));
                 }
             } catch (error) {
-                console.error('Submit error:', error);
                 showError('Error submitting timecard: ' + error.message);
             } finally {
                 const submitBtn = document.querySelector('button[onclick="submitTimecard()"]');
@@ -1010,10 +983,6 @@ function updateDayDates() {
             document.getElementById('successMessage').style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        // Make functions available globally for debugging
-        window.loadExistingTimecard = loadExistingTimecard;
-        window.calculateTotals = calculateTotals;
     </script>
 </body>
 </html>
