@@ -1208,7 +1208,60 @@ function generateMonthlySummary() {
                 }
             }
         }
+async function submitMonthlyTimecard() {
+    if (!currentEmployee) {
+        showError('No employee selected');
+        return;
+    }
 
+    const selectedMonth = document.getElementById('submitMonth').value;
+    if (!selectedMonth) {
+        showError('Please select a month to submit');
+        return;
+    }
+
+    // Calculate monthly totals for the selected month
+    const monthlyData = await calculateMonthlyTotals(selectedMonth);
+    
+    if (monthlyData.totalHours === 0) {
+        showError('No timecard data found for ' + selectedMonth);
+        return;
+    }
+
+    // Prepare submission data
+    const submissionData = {
+        employee_id: currentEmployee.id,
+        employee_name: currentEmployee.name,
+        month: selectedMonth,
+        status: 'submitted_monthly',
+        submitted_date: new Date().toISOString().split('T')[0],
+        submitted_time: new Date().toLocaleTimeString(),
+        ...monthlyData
+    };
+
+    try {
+        const submitBtn = event.target;
+        submitBtn.textContent = 'Submitting...';
+        submitBtn.disabled = true;
+
+        const result = await database.submitTimecard(submissionData);
+        
+        if (result.success) {
+            showSuccess(`Monthly timecard for ${selectedMonth} submitted successfully!`);
+            document.getElementById('submitMonth').value = '';
+        } else {
+            showError('Failed to submit monthly timecard: ' + (result.message || 'Unknown error'));
+        }
+    } catch (error) {
+        showError('Error submitting monthly timecard: ' + error.message);
+    } finally {
+        const submitBtn = document.querySelector('button[onclick="submitMonthlyTimecard()"]');
+        if (submitBtn) {
+            submitBtn.textContent = 'Submit Monthly Timecard';
+            submitBtn.disabled = false;
+        }
+    }
+}
         function showError(message) {
             document.getElementById('loadingMessage').style.display = 'none';
             document.getElementById('successMessage').style.display = 'none';
