@@ -174,7 +174,7 @@
         // Database configuration
         class TimecardDatabase {
             constructor() {
-                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbw90GaSrPn89Yuewe83Z3kokuSPebEaJwcjUxUE0DxkD2qsxpEUQAYWFyrrM0tOJkTS/exec';
+                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbwYbyF4Vb_inmApCbYaa4itYoIITQGrjetWy4892ApR9tuP_81alu76Vpq2XiIgnmhB/exec';
             }
 
             async makeRequest(url, options = {}) {
@@ -310,11 +310,11 @@
 
         function setupWeekDefault() {
             const today = new Date();
-            const monday = new Date(today);
-            monday.setDate(today.getDate() - today.getDay() + 1);
+            const sunday = new Date(today);
+            sunday.setDate(today.getDate() - today.getDay()); // Sunday is day 0
             const weekInput = document.getElementById('weekStarting');
             if (weekInput) {
-                weekInput.value = monday.toISOString().split('T')[0];
+                weekInput.value = sunday.toISOString().split('T')[0];
             }
         }
 
@@ -413,57 +413,64 @@
         function populateFormWithExistingData(timecardData) {
             console.log('Populating form with existing data:', timecardData);
             
-            // Map the weekly totals back to daily entries
-            // Since we only have weekly totals, distribute them evenly or put them all on Monday
-            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            // Since spreadsheet stores weekly totals but form needs daily breakdown,
+            // distribute the saved hours across the week or put on first available day
             
-            // For simplicity, put all hours on Monday (user can redistribute as needed)
+            if (timecardData.admin_hours && parseFloat(timecardData.admin_hours) > 0) {
+                // Put admin hours on Monday (you can change this logic)
+                const mondayAdminInput = document.getElementById('monday_admin_hourly');
+                if (mondayAdminInput) {
+                    mondayAdminInput.value = parseFloat(timecardData.admin_hours);
+                    console.log('Set Monday admin hours to:', timecardData.admin_hours);
+                }
+            }
+            
+            if (timecardData.mx_hours && parseFloat(timecardData.mx_hours) > 0) {
+                const mondayMxInput = document.getElementById('monday_mx_hourly');
+                if (mondayMxInput) {
+                    mondayMxInput.value = parseFloat(timecardData.mx_hours);
+                    console.log('Set Monday mx hours to:', timecardData.mx_hours);
+                }
+            }
+            
+            // Handle radio button categories
             if (timecardData.rev_flight && parseFloat(timecardData.rev_flight) > 0) {
-                const revFlightRadios = document.querySelectorAll('input[name="monday_rev_flight"]');
                 const value = parseFloat(timecardData.rev_flight);
-                revFlightRadios.forEach(radio => {
+                const mondayRevFlightRadios = document.querySelectorAll('input[name="monday_rev_flight"]');
+                mondayRevFlightRadios.forEach(radio => {
                     if (parseFloat(radio.value) === value) {
                         radio.checked = true;
+                        console.log('Set Monday rev_flight to:', value);
                     }
                 });
             }
             
             if (timecardData.non_rev_flight_exc && parseFloat(timecardData.non_rev_flight_exc) > 0) {
-                const nonRevExcRadios = document.querySelectorAll('input[name="monday_non_rev_flight_exc"]');
                 const value = parseFloat(timecardData.non_rev_flight_exc);
-                nonRevExcRadios.forEach(radio => {
+                const mondayNonRevExcRadios = document.querySelectorAll('input[name="monday_non_rev_flight_exc"]');
+                mondayNonRevExcRadios.forEach(radio => {
                     if (parseFloat(radio.value) === value) {
                         radio.checked = true;
+                        console.log('Set Monday non_rev_flight_exc to:', value);
                     }
                 });
             }
             
             if (timecardData.non_rev_non_flight && parseFloat(timecardData.non_rev_non_flight) > 0) {
-                const nonRevNonFlightRadios = document.querySelectorAll('input[name="monday_non_rev_non_flight"]');
                 const value = parseFloat(timecardData.non_rev_non_flight);
-                nonRevNonFlightRadios.forEach(radio => {
+                const mondayNonRevNonFlightRadios = document.querySelectorAll('input[name="monday_non_rev_non_flight"]');
+                mondayNonRevNonFlightRadios.forEach(radio => {
                     if (parseFloat(radio.value) === value) {
                         radio.checked = true;
+                        console.log('Set Monday non_rev_non_flight to:', value);
                     }
                 });
             }
             
-            if (timecardData.mx_hours && parseFloat(timecardData.mx_hours) > 0) {
-                const mxInput = document.getElementById('monday_mx_hourly');
-                if (mxInput) {
-                    mxInput.value = parseFloat(timecardData.mx_hours);
-                }
-            }
-            
-            if (timecardData.admin_hours && parseFloat(timecardData.admin_hours) > 0) {
-                const adminInput = document.getElementById('monday_admin_hourly');
-                if (adminInput) {
-                    adminInput.value = parseFloat(timecardData.admin_hours);
-                }
-            }
-            
             // Recalculate totals after populating
             calculateTotals();
+            
+            console.log('Form population completed');
         }
 
         function setupTimecardForm() {
@@ -497,7 +504,7 @@
 
         function generateDailyEntries() {
             const container = document.getElementById('dailyEntries');
-            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             
             const activeCategories = payCategories.filter(cat => 
                 currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
@@ -520,7 +527,7 @@
 
             activeCategories.forEach(category => {
                 const rate = parseFloat(currentEmployee[category.rateField]);
-                tableHTML += `<th style="padding: 12px; text-align: center; border: 1px solid #e5e7eb; font-weight: 600; font-size: 12px;">${category.label}<br><small>$${rate.toFixed(2)}/hr</small></th>`;
+                tableHTML += `<th style="padding: 12px; text-align: center; border: 1px solid #e5e7eb; font-weight: 600; font-size: 12px;">${category.label}<br><small>${rate.toFixed(2)}/hr</small></th>`;
             });
 
             tableHTML += `
@@ -619,7 +626,7 @@
             if (!weekStartInput || !weekStartInput.value) return;
             
             const weekStart = new Date(weekStartInput.value);
-            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
             
             days.forEach((day, index) => {
                 const dateElement = document.getElementById(`${day}Date`);
@@ -673,7 +680,7 @@
         function calculateTotals() {
             if (!currentEmployee) return;
             
-            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
             let weeklyTotals = {};
             
             // Initialize weekly totals
@@ -709,7 +716,7 @@
                     // Update individual pay display
                     const payDisplay = document.getElementById(`${day}_${category.id}_pay`);
                     if (payDisplay) {
-                        payDisplay.textContent = `$${pay.toFixed(2)}`;
+                        payDisplay.textContent = `${pay.toFixed(2)}`;
                     }
                     
                     dayTotal += pay;
@@ -720,7 +727,7 @@
                 // Update daily total
                 const dayTotalElement = document.getElementById(`${day}_total`);
                 if (dayTotalElement) {
-                    dayTotalElement.textContent = `$${dayTotal.toFixed(2)}`;
+                    dayTotalElement.textContent = `${dayTotal.toFixed(2)}`;
                 }
             });
 
