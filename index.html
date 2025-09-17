@@ -692,38 +692,71 @@
             loadExistingTimecard();
         }
 
-        function generateWeekSummary() {
-            const container = document.getElementById('weekSummary');
-            
-            const activeCategories = payCategories.filter(cat => 
-                currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
-            );
+    function generateWeekSummary() {
+    const container = document.getElementById('weekSummary');
+    
+    const activeCategories = payCategories.filter(cat => 
+        currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
+    );
 
-            let summaryHTML = '';
+    // Determine what types of work this employee does
+    const hasRadioCategories = activeCategories.some(cat => cat.type === 'radio');
+    const hasHourlyCategories = activeCategories.some(cat => cat.type === 'hours');
 
-      activeCategories.forEach(category => {
-    const unit = category.type === 'radio' ? 'Days' : 'Hrs';
+    let summaryHTML = '';
+
+    // Add individual category summaries
+    activeCategories.forEach(category => {
+        const unit = category.type === 'radio' ? 'Days' : 'Hrs';
+        summaryHTML += `
+            <div class="summary-item">
+                <div class="summary-value" id="week_${category.id}_hours_summary">0.0</div>
+                <div>${category.label} ${unit}</div>
+            </div>
+        `;
+    });
+
+    // Add total summaries based on what types of work they do
+    if (hasRadioCategories && hasHourlyCategories) {
+        // Has both - show both Total Days and Total Hours
+        summaryHTML += `
+            <div class="summary-item" style="background: #f0fdf4;">
+                <div class="summary-value" id="week_total_days_summary">0.0</div>
+                <div>Total Days</div>
+            </div>
+            <div class="summary-item" style="background: #f0fdf4;">
+                <div class="summary-value" id="week_total_hours_summary">0.0</div>
+                <div>Total Hours</div>
+            </div>
+        `;
+    } else if (hasRadioCategories) {
+        // Only radio categories - show Total Days
+        summaryHTML += `
+            <div class="summary-item" style="background: #f0fdf4;">
+                <div class="summary-value" id="week_total_days_summary">0.0</div>
+                <div>Total Days</div>
+            </div>
+        `;
+    } else if (hasHourlyCategories) {
+        // Only hourly categories - show Total Hours
+        summaryHTML += `
+            <div class="summary-item" style="background: #f0fdf4;">
+                <div class="summary-value" id="week_total_hours_summary">0.0</div>
+                <div>Total Hours</div>
+            </div>
+        `;
+    }
+
+    // Always show Total Pay
     summaryHTML += `
-        <div class="summary-item">
-            <div class="summary-value" id="week_${category.id}_hours_summary">0.0</div>
-            <div>${category.label} ${unit}</div>
+        <div class="summary-item" style="background: #f0fdf4;">
+            <div class="summary-value" id="week_total_pay_summary">$0.00</div>
+            <div>Total Pay</div>
         </div>
     `;
-});
 
-            summaryHTML += `
-                <div class="summary-item" style="background: #f0fdf4;">
-                    <div class="summary-value" id="week_total_hours_summary">0.0</div>
-                    <div>Total Hours</div>
-                </div>
-                <div class="summary-item" style="background: #f0fdf4;">
-                    <div class="summary-value" id="week_total_pay_summary">$0</div>
-                    <div>Total Pay</div>
-                </div>
-            `;
-
-            container.innerHTML = summaryHTML;
-        }
+    container.innerHTML = summaryHTML;
+}
 
         function calculateTotals() {
             if (!currentEmployee) return;
@@ -780,30 +813,39 @@
             updateWeekSummary(weeklyTotals);
         }
 
-        function updateWeekSummary(totals) {
-            let totalHours = 0;
-            let totalPay = 0;
+ function updateWeekSummary(totals) {
+    let totalHours = 0;
+    let totalDays = 0;
+    let totalPay = 0;
 
-            const activeCategories = payCategories.filter(cat => 
-                currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
-            );
+    const activeCategories = payCategories.filter(cat => 
+        currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
+    );
 
-   activeCategories.forEach(category => {
-    const hoursElement = document.getElementById(`week_${category.id}_hours_summary`);
+    activeCategories.forEach(category => {
+        const hoursElement = document.getElementById(`week_${category.id}_hours_summary`);
+        
+        if (hoursElement && totals[category.id]) {
+            hoursElement.textContent = totals[category.id].hours.toFixed(1);
+            
+            if (category.type === 'radio') {
+                totalDays += totals[category.id].hours;
+            } else {
+                totalHours += totals[category.id].hours;
+            }
+            totalPay += totals[category.id].pay;
+        }
+    });
+
+    // Update totals based on what elements exist
+    const totalDaysElement = document.getElementById('week_total_days_summary');
+    const totalHoursElement = document.getElementById('week_total_hours_summary');
+    const totalPayElement = document.getElementById('week_total_pay_summary');
     
-    if (hoursElement && totals[category.id]) {
-        hoursElement.textContent = totals[category.id].hours.toFixed(1);
-        totalHours += totals[category.id].hours;
-        totalPay += totals[category.id].pay;
-    }
-});
-
-            const totalHoursElement = document.getElementById('week_total_hours_summary');
-const totalPayElement = document.getElementById('week_total_pay_summary');
-
-
-if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
-if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(2)}`;        }
+    if (totalDaysElement) totalDaysElement.textContent = totalDays.toFixed(1);
+    if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
+    if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(2)}`;
+}
 
         function collectTimecardData(weekStarting, status = 'pending') {
             const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
