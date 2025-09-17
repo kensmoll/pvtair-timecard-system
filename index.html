@@ -785,7 +785,7 @@
             );
 
             activeCategories.forEach(category => {
-                const hoursElement = document.getElementById(`week_${category.id}_hours`);
+                const hoursElement = document.getElementById(`week_${category.id}_hours_summary`);
                 
                 if (hoursElement && totals[category.id]) {
                     hoursElement.textContent = totals[category.id].hours.toFixed(1);
