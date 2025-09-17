@@ -1333,11 +1333,20 @@ if (result.success && result.data) {
                     const rate = parseFloat(currentEmployee[category.rateField]);
                     let weekCategoryHours = 0;
                     
-                    days.forEach(day => {
-                        const fieldName = `${day}_${category.id}`;
-                        const hours = parseFloat(result.data[fieldName]) || 0;
-                        weekCategoryHours += hours;
-                    });
+                   days.forEach(day => {
+    const fieldName = `${day}_${category.id}`;
+    const hours = parseFloat(result.data[fieldName]) || 0;
+    
+    // Calculate which actual date this day represents
+    const dayIndex = days.indexOf(day);
+    const actualDate = new Date(sunday);
+    actualDate.setDate(actualDate.getDate() + dayIndex);
+    
+    // Only count hours if the day falls within the target month
+    if (actualDate.getMonth() === currentMonth && actualDate.getFullYear() === currentYear) {
+        weekCategoryHours += hours;
+    }
+});
                     
                     monthlyTotals[category.id].hours += weekCategoryHours;
                     monthlyTotals[category.id].pay += weekCategoryHours * rate;
