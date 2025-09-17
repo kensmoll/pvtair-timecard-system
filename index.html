@@ -280,8 +280,7 @@
     <label for="weekStarting">Week of:</label>
     <div style="display: flex; align-items: center; gap: 10px;">
         <button type="button" onclick="changeWeek(-1)" style="background: #6b7280; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px;">◀</button>
-        <input type="date" id="weekStarting" onchange="updateDayDates()" onblur="enforceSunday()" style="flex: 1;">
-        <button type="button" onclick="changeWeek(1)" style="background: #6b7280; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px;">▶</button>
+<input type="date" id="weekStarting" onchange="enforceSunday(); updateDayDates();" onblur="enforceSunday()" style="flex: 1;">        <button type="button" onclick="changeWeek(1)" style="background: #6b7280; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px;">▶</button>
     </div>
 </div>
                 
@@ -538,12 +537,10 @@ console.log('displayMonthlySummary called with:', JSON.stringify(totals, null, 2
 function enforceSunday() {
     const weekInput = document.getElementById('weekStarting');
     if (weekInput && weekInput.value) {
-        const selectedDate = new Date(weekInput.value);
-        // Always find the Sunday of the selected week (could be before or same day)
+        const selectedDate = new Date(weekInput.value + 'T12:00:00'); // Use noon to avoid timezone issues
         const sunday = new Date(selectedDate);
         sunday.setDate(selectedDate.getDate() - selectedDate.getDay());
         weekInput.value = sunday.toISOString().split('T')[0];
-        updateDayDates();
     }
 }
 function changeWeek(direction) {
