@@ -577,6 +577,7 @@
             
             calculateTotals();
             console.log('Form population with daily breakdown completed');
+            calculateTotals();
         }
 
         function setupTimecardForm() {
@@ -733,6 +734,7 @@ console.log(`Rate for ${category.label}:`, rate, `Field: ${category.rateField}`)
 
         function calculateTotals() {
             if (!currentEmployee) return;
+            console.log('calculateTotals() called, weeklyTotals will be:', weeklyTotals);
             
             const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
             let weeklyTotals = {};
@@ -782,6 +784,7 @@ console.log(`Rate for ${category.label}:`, rate, `Field: ${category.rateField}`)
                 }
             });
 
+console.log('About to call updateWeekSummary with:', weeklyTotals);
             updateWeekSummary(weeklyTotals);
         }
 
