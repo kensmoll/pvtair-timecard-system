@@ -802,8 +802,11 @@ function clearTimecardForm() {
                 }
             });
             
-            loadExistingTimecard().then(() => {
-    updateMonthlySummary();
+loadExistingTimecard().then(() => {
+    // Small delay to ensure all elements are rendered
+    setTimeout(() => {
+        updateMonthlySummary();
+    }, 100);
 });
         }
 
@@ -870,8 +873,12 @@ function clearTimecardForm() {
                 </div>
             `;
 
-            container.innerHTML = summaryHTML;
+container.innerHTML = summaryHTML;
 generateMonthlySummary();
+// Update monthly summary after elements are created
+setTimeout(() => {
+    updateMonthlySummary();
+}, 100);
         }
 function generateMonthlySummary() {
     const weekSelector = document.querySelector('.week-summary');
