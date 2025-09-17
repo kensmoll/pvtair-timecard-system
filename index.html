@@ -456,7 +456,9 @@ async function updateMonthlySummary() {
             const weekString = sunday.toISOString().split('T')[0];
             const result = await database.getExistingTimecard(currentEmployee.id, weekString);
             
-            if (result.success && result.data) {
+console.log('Checking week:', weekString, 'Result:', result.success, 'Has data:', !!result.data);
+if (result.success && result.data) {
+    console.log('Found data for week:', weekString, 'Data:', result.data);
                 const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
                 
                 payCategories.forEach(category => {
