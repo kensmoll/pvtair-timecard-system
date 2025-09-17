@@ -278,7 +278,7 @@
                 
                 <div class="week-selector">
                     <label for="weekStarting">Week Starting (Sunday):</label>
-                    <input type="date" id="weekStarting" onchange="updateDayDates()">
+                    <input type="date" id="weekStarting" onchange="updateDayDates()" onblur="enforceSunday()">
                 </div>
                 
                 <div id="dailyEntries" class="timecard-table"></div>
@@ -409,34 +409,31 @@
             setupWeekDefault();
         });
 
-        function setupWeekDefault() {
-            const today = new Date();
-            const sunday = new Date(today);
-            sunday.setDate(today.getDate() - today.getDay());
-            const weekInput = document.getElementById('weekStarting');
-            if (weekInput) {
-                weekInput.value = sunday.toISOString().split('T')[0];
-            }
-        }
+ function setupWeekDefault() {
+    const today = new Date();
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() - today.getDay());
+    const weekInput = document.getElementById('weekStarting');
+    if (weekInput) {
+        weekInput.value = sunday.toISOString().split('T')[0];
+        enforceSunday();
+    }
+}
 
-        function restrictToSundays() {
-            const weekInput = document.getElementById('weekStarting');
-            if (weekInput) {
-                weekInput.addEventListener('input', function() {
-                    const selectedDate = new Date(this.value);
-                    const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-                    
-                    if (dayOfWeek !== 0) {
-                        // Find the previous Sunday
-                        const daysToSubtract = dayOfWeek;
-                        selectedDate.setDate(selectedDate.getDate() - daysToSubtract);
-                        this.value = selectedDate.toISOString().split('T')[0];
-                        updateDayDates();
-                    }
-                });
-            }
+    function enforceSunday() {
+    const weekInput = document.getElementById('weekStarting');
+    if (weekInput && weekInput.value) {
+        const selectedDate = new Date(weekInput.value);
+        const dayOfWeek = selectedDate.getDay();
+        
+        if (dayOfWeek !== 0) {
+            const daysToSubtract = dayOfWeek;
+            selectedDate.setDate(selectedDate.getDate() - daysToSubtract);
+            weekInput.value = selectedDate.toISOString().split('T')[0];
+            updateDayDates();
         }
-
+    }
+}
         async function loadEmployeeSelector() {
             try {
                 const employees = await database.getEmployees();
@@ -557,7 +554,6 @@
             
             displayPayRates();
             generateDailyEntries();
-            restrictToSundays();
         }
 
         function displayPayRates() {
