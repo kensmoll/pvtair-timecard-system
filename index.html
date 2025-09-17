@@ -446,6 +446,11 @@ function changeWeek(direction) {
     currentDate.setDate(currentDate.getDate() + (direction * 7)); // Add or subtract 7 days
     
     weekInput.value = currentDate.toISOString().split('T')[0];
+    
+    // Clear the form first
+    clearTimecardForm();
+    
+    // Then load data for the new week
     updateDayDates();
 }
         async function loadEmployeeSelector() {
