@@ -553,8 +553,8 @@ function changeWeek(direction) {
     // Clear the form first
     clearTimecardForm();
     
-    // Load data for the new week (this will populate if data exists)
-    loadExistingTimecard();
+    // Then load data for the new week
+    updateDayDates();
 }
 function clearTimecardForm() {
     // Clear all radio buttons - set to 0
@@ -573,16 +573,8 @@ function clearTimecardForm() {
         input.value = '';
     });
     
-    // Clear displays but don't recalculate yet
-    const payDisplays = document.querySelectorAll('.pay-display');
-    payDisplays.forEach(display => {
-        display.textContent = '$0.00';
-    });
-    
-    const dailyTotals = document.querySelectorAll('[id$="_total"]');
-    dailyTotals.forEach(total => {
-        total.textContent = 'Daily Total: $0.00';
-    });
+    // Reset all pay displays and totals
+    calculateTotals();
 }
         async function loadEmployeeSelector() {
             try {
