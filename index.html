@@ -771,7 +771,7 @@ console.log(`Rate for ${category.label}:`, rate, `Field: ${category.rateField}`)
                     
                     const payDisplay = document.getElementById(`${day}_${category.id}_pay`);
                     if (payDisplay) {
-                        payDisplay.textContent = `${pay.toFixed(0)}`;
+                        payDisplay.textContent = `${pay.toFixed(2)}`;
                     }
                     
                     dayTotal += pay;
@@ -781,7 +781,7 @@ console.log(`Rate for ${category.label}:`, rate, `Field: ${category.rateField}`)
 
                 const dayTotalElement = document.getElementById(`${day}_total`);
                 if (dayTotalElement) {
-                    dayTotalElement.textContent = `Daily Total: ${dayTotal.toFixed(0)}`;
+                    dayTotalElement.textContent = `Daily Total: ${dayTotal.toFixed(2)}`;
                 }
             });
 
@@ -816,8 +816,7 @@ console.log('Total hours element:', totalHoursElement, 'Total pay element:', tot
 console.log('Final totals - Hours:', totalHours, 'Pay:', totalPay);
 
 if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
-if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(0)}`;
-        }
+if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(2)}`;        }
 
         function collectTimecardData(weekStarting, status = 'pending') {
             const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
