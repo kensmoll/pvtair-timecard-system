@@ -412,7 +412,110 @@
             
             setupWeekDefault();
         });
+async function updateMonthlySummary() {
+    if (!currentEmployee) return;
+    
+    const weekStarting = document.getElementById('weekStarting').value;
+    if (!weekStarting) return;
+    
+    // Get the current month and year from the selected week
+    const currentDate = new Date(weekStarting);
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    
+    // Find all Sundays in the current month
+    const sundaysInMonth = [];
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    
+    // Find the first Sunday of the month (or before if month doesn't start on Sunday)
+    let currentSunday = new Date(firstDay);
+    currentSunday.setDate(currentSunday.getDate() - currentSunday.getDay());
+    
+    // Collect all Sundays that have days in this month
+    while (currentSunday <= lastDay) {
+        // Check if this Sunday's week has any days in the current month
+        const weekEnd = new Date(currentSunday);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        
+        if (weekEnd >= firstDay && currentSunday <= lastDay) {
+            sundaysInMonth.push(new Date(currentSunday));
+        }
+        currentSunday.setDate(currentSunday.getDate() + 7);
+    }
+    
+    // Fetch data for all weeks in the month
+    let monthlyTotals = {};
+    payCategories.forEach(cat => {
+        monthlyTotals[cat.id] = { hours: 0, pay: 0 };
+    });
+    
+    for (const sunday of sundaysInMonth) {
+        try {
+            const weekString = sunday.toISOString().split('T')[0];
+            const result = await database.getExistingTimecard(currentEmployee.id, weekString);
+            
+            if (result.success && result.data) {
+                const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                
+                payCategories.forEach(category => {
+                    if (!currentEmployee[category.rateField] || parseFloat(currentEmployee[category.rateField]) <= 0) return;
+                    
+                    const rate = parseFloat(currentEmployee[category.rateField]);
+                    let weekCategoryHours = 0;
+                    
+                    days.forEach(day => {
+                        const fieldName = `${day}_${category.id}`;
+                        const hours = parseFloat(result.data[fieldName]) || 0;
+                        weekCategoryHours += hours;
+                    });
+                    
+                    monthlyTotals[category.id].hours += weekCategoryHours;
+                    monthlyTotals[category.id].pay += weekCategoryHours * rate;
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching week data for monthly summary:', error);
+        }
+    }
+    
+    // Update the monthly summary display
+    displayMonthlySummary(monthlyTotals);
+}
 
+function displayMonthlySummary(totals) {
+    let totalHours = 0;
+    let totalDays = 0;
+    let totalPay = 0;
+
+    const activeCategories = payCategories.filter(cat => 
+        currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
+    );
+
+    activeCategories.forEach(category => {
+        const hoursElement = document.getElementById(`month_${category.id}_hours_summary`);
+        
+        if (hoursElement && totals[category.id]) {
+            hoursElement.textContent = totals[category.id].hours.toFixed(1);
+            
+            if (category.type === 'radio') {
+                totalDays += totals[category.id].hours;
+            } else {
+                totalHours += totals[category.id].hours;
+            }
+            totalPay += totals[category.id].pay;
+        }
+    });
+
+    // Update monthly totals
+    const totalDaysElement = document.getElementById('month_total_days_summary');
+    const totalHoursElement = document.getElementById('month_total_hours_summary');
+    const totalPayElement = document.getElementById('month_total_pay_summary');
+    
+    if (totalDaysElement) totalDaysElement.textContent = totalDays.toFixed(1);
+    if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
+    if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(2)}`;
+}
  function setupWeekDefault() {
     const today = new Date();
     const sunday = new Date(today);
@@ -699,7 +802,9 @@ function clearTimecardForm() {
                 }
             });
             
-            loadExistingTimecard();
+            loadExistingTimecard().then(() => {
+    updateMonthlySummary();
+});
         }
 
         function generateWeekSummary() {
