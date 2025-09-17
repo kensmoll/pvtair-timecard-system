@@ -1305,10 +1305,17 @@ const monthlyData = await calculateMonthlyTotals(monthYear);
     for (const sunday of sundaysInMonth) {
         try {
             const weekString = sunday.toISOString().split('T')[0];
-            const result = await database.getExistingTimecard(currentEmployee.id, weekString);
-            
-            if (result.success && result.data) {
-                console.log('Found data for week:', weekString);
+            let result = await database.getExistingTimecard(currentEmployee.id, weekString);
+// If no data found, try the next day (Monday bias workaround)
+if (!result.success || !result.data) {
+    const altSunday = new Date(sunday);
+    altSunday.setDate(altSunday.getDate() + 1);
+    const altWeekString = altSunday.toISOString().split('T')[0];
+    result = await database.getExistingTimecard(currentEmployee.id, altWeekString);
+}
+
+if (result.success && result.data) {
+    console.log('Found data for week:', result.data.week_starting || weekString);
                 const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
                 
                 payCategories.forEach(category => {
