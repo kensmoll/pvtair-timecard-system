@@ -793,15 +793,17 @@ console.log(`Rate for ${category.label}:`, rate, `Field: ${category.rateField}`)
                 currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
             );
 
-            activeCategories.forEach(category => {
-                const hoursElement = document.getElementById(`week_${category.id}_hours_summary`);
-                
-                if (hoursElement && totals[category.id]) {
-                    hoursElement.textContent = totals[category.id].hours.toFixed(1);
-                    totalHours += totals[category.id].hours;
-                    totalPay += totals[category.id].pay;
-                }
-            });
+   activeCategories.forEach(category => {
+    const hoursElement = document.getElementById(`week_${category.id}_hours_summary`);
+    console.log(`Looking for element: week_${category.id}_hours_summary`, hoursElement);
+    console.log(`Totals for ${category.id}:`, totals[category.id]);
+    
+    if (hoursElement && totals[category.id]) {
+        hoursElement.textContent = totals[category.id].hours.toFixed(1);
+        totalHours += totals[category.id].hours;
+        totalPay += totals[category.id].pay;
+    }
+});
 
             const totalHoursElement = document.getElementById('week_total_hours_summary');
             const totalPayElement = document.getElementById('week_total_pay');
