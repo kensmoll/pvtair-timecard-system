@@ -679,14 +679,14 @@
             const weekStart = new Date(weekStartInput.value);
             const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
             
-            days.forEach((day, index) => {
-                const dateElement = document.getElementById(`${day}Date`);
-                if (dateElement) {
-                    const date = new Date(weekStart);
-                    date.setDate(weekStart.getDate() + index);
-                    dateElement.textContent = date.toLocaleDateString();
-                }
-            });
+  days.forEach((day, index) => {
+    const dateElement = document.getElementById(`${day}Date`);
+    if (dateElement) {
+        const date = new Date(weekStart);
+        date.setDate(date.getDate() + index);
+        dateElement.textContent = date.toLocaleDateString();
+    }
+});
             
             loadExistingTimecard();
         }
