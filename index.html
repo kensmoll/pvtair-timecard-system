@@ -451,9 +451,15 @@ while (currentSunday <= lastDay) {
     for (const sunday of sundaysInMonth) {
         try {
 const weekString = sunday.toISOString().split('T')[0];
-console.log('Trying to find data for week starting:', weekString);
-            const result = await database.getExistingTimecard(currentEmployee.id, weekString);
-            
+// Also try the next day in case of date calculation issues
+const altSunday = new Date(sunday);
+altSunday.setDate(altSunday.getDate() + 1);
+const altWeekString = altSunday.toISOString().split('T')[0];console.log('Trying to find data for week starting:', weekString);
+let result = await database.getExistingTimecard(currentEmployee.id, weekString);
+// If no data found, try the next day
+if (!result.success || !result.data) {
+    result = await database.getExistingTimecard(currentEmployee.id, altWeekString);
+}            
 console.log('Checking week:', weekString, 'Result:', result.success, 'Has data:', !!result.data);
 if (result.success && result.data) {
     console.log('Found data for week:', weekString, 'Data:', result.data);
