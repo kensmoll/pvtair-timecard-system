@@ -292,10 +292,30 @@
                     <div class="summary-grid" id="weekSummary"></div>
                 </div>
                 
-                <div class="button-row">
-                    <button class="btn save" onclick="saveTimecard()">Save Progress</button>
-                    <button class="btn" onclick="submitTimecard()">Submit Timecard</button>
-                </div>
+               <div class="button-row">
+    <button class="btn save" onclick="saveTimecard()">Save Progress</button>
+    
+    <div style="width: 100%; margin: 10px 0;">
+        <label for="submitMonth" style="display: block; font-weight: 600; margin-bottom: 5px;">Submit Monthly Timecard For:</label>
+        <select id="submitMonth" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="">Select Month...</option>
+            <option value="2025-01">January 2025</option>
+            <option value="2025-02">February 2025</option>
+            <option value="2025-03">March 2025</option>
+            <option value="2025-04">April 2025</option>
+            <option value="2025-05">May 2025</option>
+            <option value="2025-06">June 2025</option>
+            <option value="2025-07">July 2025</option>
+            <option value="2025-08">August 2025</option>
+            <option value="2025-09">September 2025</option>
+            <option value="2025-10">October 2025</option>
+            <option value="2025-11">November 2025</option>
+            <option value="2025-12">December 2025</option>
+        </select>
+    </div>
+    
+    <button class="btn" onclick="submitMonthlyTimecard()">Submit Monthly Timecard</button>
+</div>
             </div>
         </div>
     </div>
