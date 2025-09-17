@@ -413,6 +413,7 @@
             setupWeekDefault();
         });
 async function updateMonthlySummary() {
+        console.log('updateMonthlySummary called');  // ADD THIS LINE
     if (!currentEmployee) return;
     
     const weekStarting = document.getElementById('weekStarting').value;
@@ -478,13 +479,14 @@ async function updateMonthlySummary() {
             console.error('Error fetching week data for monthly summary:', error);
         }
     }
-    
+    console.log('About to call displayMonthlySummary with monthlyTotals:', monthlyTotals);  // ADD THIS LINE
     // Update the monthly summary display
     displayMonthlySummary(monthlyTotals);
 }
 
 function displayMonthlySummary(totals) {
-    let totalHours = 0;
+       console.log('displayMonthlySummary called with:', totals);  // ADD THIS LINE
+ let totalHours = 0;
     let totalDays = 0;
     let totalPay = 0;
 
