@@ -839,7 +839,7 @@ currentDate.setDate(currentDate.getDate() + index);
 loadExistingTimecard().then(() => {
     // Small delay to ensure all elements are rendered
     setTimeout(() => {
-//        updateMonthlySummary();
+        updateMonthlySummary();
     }, 100);
 });
         }
@@ -908,11 +908,11 @@ loadExistingTimecard().then(() => {
             `;
 
 container.innerHTML = summaryHTML;
-// generateMonthlySummary();
+ generateMonthlySummary();
 // Update monthly summary after elements are created
-// setTimeout(() => {
-//    updateMonthlySummary();
-// }, 100);
+ setTimeout(() => {
+    updateMonthlySummary();
+ }, 100);
         }
 function generateMonthlySummary() {
     const weekSelector = document.querySelector('.week-summary');
