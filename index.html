@@ -438,6 +438,16 @@
         }
     }
 }
+function changeWeek(direction) {
+    const weekInput = document.getElementById('weekStarting');
+    if (!weekInput || !weekInput.value) return;
+    
+    const currentDate = new Date(weekInput.value);
+    currentDate.setDate(currentDate.getDate() + (direction * 7)); // Add or subtract 7 days
+    
+    weekInput.value = currentDate.toISOString().split('T')[0];
+    updateDayDates();
+}
         async function loadEmployeeSelector() {
             try {
                 const employees = await database.getEmployees();
