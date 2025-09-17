@@ -295,24 +295,34 @@
                <div class="button-row">
     <button class="btn save" onclick="saveTimecard()">Save Progress</button>
     
-    <div style="width: 100%; margin: 10px 0;">
-        <label for="submitMonth" style="display: block; font-weight: 600; margin-bottom: 5px;">Submit Monthly Timecard For:</label>
-        <select id="submitMonth" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-            <option value="">Select Month...</option>
-            <option value="2025-01">January 2025</option>
-            <option value="2025-02">February 2025</option>
-            <option value="2025-03">March 2025</option>
-            <option value="2025-04">April 2025</option>
-            <option value="2025-05">May 2025</option>
-            <option value="2025-06">June 2025</option>
-            <option value="2025-07">July 2025</option>
-            <option value="2025-08">August 2025</option>
-            <option value="2025-09">September 2025</option>
-            <option value="2025-10">October 2025</option>
-            <option value="2025-11">November 2025</option>
-            <option value="2025-12">December 2025</option>
+   <div style="width: 100%; margin: 10px 0;">
+    <label style="display: block; font-weight: 600; margin-bottom: 5px;">Submit Monthly Timecard For:</label>
+    <div style="display: flex; gap: 10px;">
+        <select id="submitMonth" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="">Month...</option>
+            <option value="01">January</option>
+            <option value="02">February</option>
+            <option value="03">March</option>
+            <option value="04">April</option>
+            <option value="05">May</option>
+            <option value="06">June</option>
+            <option value="07">July</option>
+            <option value="08">August</option>
+            <option value="09">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+        <select id="submitYear" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="">Year...</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
         </select>
     </div>
+</div>
     
     <button class="btn" onclick="submitMonthlyTimecard()">Submit Monthly Timecard</button>
 </div>
@@ -1022,7 +1032,7 @@ function generateMonthlySummary() {
                 }
             });
 
-//            updateWeekSummary(weeklyTotals);
+            updateWeekSummary(weeklyTotals);
         }
 
         function updateWeekSummary(totals) {
@@ -1059,7 +1069,7 @@ function generateMonthlySummary() {
             if (totalPayElement) totalPayElement.textContent = `${totalPay.toFixed(2)}`;
               
     // Update monthly summary after weekly calculations are complete
-//    updateMonthlySummary();
+    updateMonthlySummary();
         }
 
         function collectTimecardData(weekStarting, status = 'pending') {
@@ -1214,14 +1224,18 @@ async function submitMonthlyTimecard() {
         return;
     }
 
-    const selectedMonth = document.getElementById('submitMonth').value;
-    if (!selectedMonth) {
-        showError('Please select a month to submit');
-        return;
-    }
+   const selectedMonth = document.getElementById('submitMonth').value;
+const selectedYear = document.getElementById('submitYear').value;
+
+if (!selectedMonth || !selectedYear) {
+    showError('Please select both month and year to submit');
+    return;
+}
+
+const monthYear = `${selectedYear}-${selectedMonth}`;
 
     // Calculate monthly totals for the selected month
-    const monthlyData = await calculateMonthlyTotals(selectedMonth);
+const monthlyData = await calculateMonthlyTotals(monthYear);
     
     if (monthlyData.totalHours === 0) {
         showError('No timecard data found for ' + selectedMonth);
