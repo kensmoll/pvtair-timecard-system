@@ -453,6 +453,26 @@ function changeWeek(direction) {
     // Then load data for the new week
     updateDayDates();
 }
+        function clearTimecardForm() {
+    // Clear all radio buttons - set to 0
+    const radioButtons = document.querySelectorAll('input[type="radio"]');
+    radioButtons.forEach(radio => {
+        if (radio.value === '0') {
+            radio.checked = true;
+        } else {
+            radio.checked = false;
+        }
+    });
+    
+    // Clear all number inputs
+    const numberInputs = document.querySelectorAll('input[type="number"]');
+    numberInputs.forEach(input => {
+        input.value = '';
+    });
+    
+    // Reset all pay displays and totals
+    calculateTotals();
+}
         async function loadEmployeeSelector() {
             try {
                 const employees = await database.getEmployees();
