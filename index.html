@@ -809,10 +809,13 @@ console.log('About to call updateWeekSummary with:', weeklyTotals);
 });
 
             const totalHoursElement = document.getElementById('week_total_hours_summary');
-            const totalPayElement = document.getElementById('week_total_pay');
-            
-            if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
-            if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(0)}`;
+const totalPayElement = document.getElementById('week_total_pay_summary');
+
+console.log('Total hours element:', totalHoursElement, 'Total pay element:', totalPayElement);
+console.log('Final totals - Hours:', totalHours, 'Pay:', totalPay);
+
+if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
+if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(0)}`;
         }
 
         function collectTimecardData(weekStarting, status = 'pending') {
