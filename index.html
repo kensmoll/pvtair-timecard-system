@@ -276,10 +276,14 @@
                     <div id="payRates"></div>
                 </div>
                 
-                <div class="week-selector">
-                    <label for="weekStarting">Week Starting (Sunday):</label>
-                    <input type="date" id="weekStarting" onchange="updateDayDates()" onblur="enforceSunday()">
-                </div>
+      <div class="week-selector">
+    <label for="weekStarting">Week Starting (Sunday):</label>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" onclick="changeWeek(-1)" style="background: #6b7280; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px;">◀</button>
+        <input type="date" id="weekStarting" onchange="updateDayDates()" onblur="enforceSunday()" style="flex: 1;">
+        <button type="button" onclick="changeWeek(1)" style="background: #6b7280; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px;">▶</button>
+    </div>
+</div>
                 
                 <div id="dailyEntries" class="timecard-table"></div>
                 
