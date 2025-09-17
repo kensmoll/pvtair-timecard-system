@@ -492,6 +492,13 @@
                 }
                 
                 console.log('Current employee:', currentEmployee);
+                console.log('Employee rate fields:', {
+    rev_flight: currentEmployee.rate_rev_flight,
+    non_rev_exc: currentEmployee.rate_non_rev_flight_exc,
+    non_rev_non_flight: currentEmployee.rate_non_rev_non_flight,
+    mx_hourly: currentEmployee.rate_mx_hourly,
+    admin_hourly: currentEmployee.rate_admin_hourly
+});
                 setupTimecardForm();
                 await loadExistingTimecard();
                 
@@ -629,7 +636,8 @@
                 `;
 
                 activeCategories.forEach(category => {
-                    const rate = parseFloat(currentEmployee[category.rateField]);
+  const rate = parseFloat(currentEmployee[category.rateField]) || 0;
+console.log(`Rate for ${category.label}:`, rate, `Field: ${category.rateField}`);
                     
                     html += `
                         <div class="category-item">
