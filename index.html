@@ -799,7 +799,7 @@
             const totalPayElement = document.getElementById('week_total_pay');
             
             if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
-            if (totalPayElement) totalPayElement.textContent = `${totalPay.toFixed(0)}`;
+            if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(0)}`;
         }
 
         function collectTimecardData(weekStarting, status = 'pending') {
