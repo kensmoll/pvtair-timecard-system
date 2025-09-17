@@ -699,14 +699,15 @@
 
             let summaryHTML = '';
 
-            activeCategories.forEach(category => {
-                summaryHTML += `
-                    <div class="summary-item">
-                        <div class="summary-value" id="week_${category.id}_hours_summary">0.0</div>
-                        <div>${category.label} Hrs</div>
-                    </div>
-                `;
-            });
+      activeCategories.forEach(category => {
+    const unit = category.type === 'radio' ? 'Days' : 'Hrs';
+    summaryHTML += `
+        <div class="summary-item">
+            <div class="summary-value" id="week_${category.id}_hours_summary">0.0</div>
+            <div>${category.label} ${unit}</div>
+        </div>
+    `;
+});
 
             summaryHTML += `
                 <div class="summary-item" style="background: #f0fdf4;">
