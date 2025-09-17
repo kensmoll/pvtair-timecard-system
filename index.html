@@ -766,8 +766,75 @@ function clearTimecardForm() {
             `;
 
             container.innerHTML = summaryHTML;
+generateMonthlySummary();
         }
+function generateMonthlySummary() {
+    const weekSelector = document.querySelector('.week-summary');
+    
+    const activeCategories = payCategories.filter(cat => 
+        currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
+    );
 
+    // Determine what types of work this employee does
+    const hasRadioCategories = activeCategories.some(cat => cat.type === 'radio');
+    const hasHourlyCategories = activeCategories.some(cat => cat.type === 'hours');
+
+    let monthlySummaryHTML = `
+        <div class="week-summary" style="margin-top: 15px; background: #fefce8; border: 2px solid #fbbf24;">
+            <h4 style="color: #92400e;">Monthly Summary</h4>
+            <div class="summary-grid" id="monthlySummary">
+    `;
+
+    // Add individual category monthly summaries
+    activeCategories.forEach(category => {
+        const unit = category.type === 'radio' ? 'Days' : 'Hrs';
+        monthlySummaryHTML += `
+            <div class="summary-item">
+                <div class="summary-value" id="month_${category.id}_hours_summary">0.0</div>
+                <div>${category.label} ${unit}</div>
+            </div>
+        `;
+    });
+
+    // Add monthly totals based on what types of work they do
+    if (hasRadioCategories && hasHourlyCategories) {
+        monthlySummaryHTML += `
+            <div class="summary-item" style="background: #f0fdf4;">
+                <div class="summary-value" id="month_total_days_summary">0.0</div>
+                <div>Total Days</div>
+            </div>
+            <div class="summary-item" style="background: #f0fdf4;">
+                <div class="summary-value" id="month_total_hours_summary">0.0</div>
+                <div>Total Hours</div>
+            </div>
+        `;
+    } else if (hasRadioCategories) {
+        monthlySummaryHTML += `
+            <div class="summary-item" style="background: #f0fdf4;">
+                <div class="summary-value" id="month_total_days_summary">0.0</div>
+                <div>Total Days</div>
+            </div>
+        `;
+    } else if (hasHourlyCategories) {
+        monthlySummaryHTML += `
+            <div class="summary-item" style="background: #f0fdf4;">
+                <div class="summary-value" id="month_total_hours_summary">0.0</div>
+                <div>Total Hours</div>
+            </div>
+        `;
+    }
+
+    monthlySummaryHTML += `
+            <div class="summary-item" style="background: #f0fdf4;">
+                <div class="summary-value" id="month_total_pay_summary">$0.00</div>
+                <div>Total Pay</div>
+            </div>
+        </div>
+    </div>
+    `;
+
+    weekSelector.insertAdjacentHTML('afterend', monthlySummaryHTML);
+}
         function calculateTotals() {
             if (!currentEmployee) return;
             
