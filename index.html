@@ -798,8 +798,8 @@ function clearTimecardForm() {
             days.forEach((day, index) => {
                 const dateElement = document.getElementById(`${day}Date`);
                 if (dateElement) {
-                    const currentDate = new Date(startDate);
-                    currentDate.setDate(startDate.getDate() + index);
+                const currentDate = new Date(startDate);
+currentDate.setDate(currentDate.getDate() + index);
                     dateElement.textContent = currentDate.toLocaleDateString();
                 }
             });
