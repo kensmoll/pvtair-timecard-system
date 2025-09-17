@@ -537,7 +537,7 @@ console.log('displayMonthlySummary called with:', JSON.stringify(totals, null, 2
 function enforceSunday() {
     const weekInput = document.getElementById('weekStarting');
     if (weekInput && weekInput.value) {
-        const selectedDate = new Date(weekInput.value + 'T12:00:00'); // Use noon to avoid timezone issues
+        const selectedDate = new Date(weekInput.value + 'T00:00:00');
         const sunday = new Date(selectedDate);
         sunday.setDate(selectedDate.getDate() - selectedDate.getDay());
         weekInput.value = sunday.toISOString().split('T')[0];
@@ -1000,7 +1000,7 @@ function generateMonthlySummary() {
                 }
             });
 
-            updateWeekSummary(weeklyTotals);
+//            updateWeekSummary(weeklyTotals);
         }
 
         function updateWeekSummary(totals) {
