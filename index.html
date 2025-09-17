@@ -533,26 +533,35 @@
             days.forEach(day => {
                 categories.forEach(category => {
                     const fieldName = `${day}_${category}`;
+                    console.log('Looking for field:', fieldName, 'Value:', timecardData[fieldName]);
+                    
                     if (timecardData[fieldName] !== undefined && timecardData[fieldName] !== null) {
                         const value = parseFloat(timecardData[fieldName]) || 0;
                         
-                        // Find the category info
-                        const categoryInfo = payCategories.find(cat => cat.id === category);
-                        if (!categoryInfo) return;
-                        
-                        if (categoryInfo.type === 'radio' && value > 0) {
-                            const radioButtons = document.querySelectorAll(`input[name="${day}_${category}"]`);
-                            radioButtons.forEach(radio => {
-                                if (parseFloat(radio.value) === value) {
-                                    radio.checked = true;
-                                    console.log(`Set ${day} ${category} radio to:`, value);
+                        if (value > 0) {
+                            // Find the category info
+                            const categoryInfo = payCategories.find(cat => cat.id === category);
+                            if (!categoryInfo) {
+                                console.log('Category not found:', category);
+                                return;
+                            }
+                            
+                            if (categoryInfo.type === 'radio') {
+                                const radioButtons = document.querySelectorAll(`input[name="${day}_${category}"]`);
+                                radioButtons.forEach(radio => {
+                                    if (parseFloat(radio.value) === value) {
+                                        radio.checked = true;
+                                        console.log(`✓ Set ${day} ${category} radio to:`, value);
+                                    }
+                                });
+                            } else if (categoryInfo.type === 'hours') {
+                                const input = document.getElementById(`${day}_${category}`);
+                                if (input) {
+                                    input.value = value;
+                                    console.log(`✓ Set ${day} ${category} hours to:`, value);
+                                } else {
+                                    console.log(`✗ Input not found for ${day}_${category}`);
                                 }
-                            });
-                        } else if (categoryInfo.type === 'hours' && value > 0) {
-                            const input = document.getElementById(`${day}_${category}`);
-                            if (input) {
-                                input.value = value;
-                                console.log(`Set ${day} ${category} hours to:`, value);
                             }
                         }
                     }
@@ -693,7 +702,7 @@
             activeCategories.forEach(category => {
                 summaryHTML += `
                     <div class="summary-item">
-                        <div class="summary-value" id="week_${category.id}_hours">0.0</div>
+                        <div class="summary-value" id="week_${category.id}_hours_summary">0.0</div>
                         <div>${category.label} Hrs</div>
                     </div>
                 `;
@@ -701,11 +710,11 @@
 
             summaryHTML += `
                 <div class="summary-item" style="background: #f0fdf4;">
-                    <div class="summary-value" id="week_total_hours">0.0</div>
+                    <div class="summary-value" id="week_total_hours_summary">0.0</div>
                     <div>Total Hours</div>
                 </div>
                 <div class="summary-item" style="background: #f0fdf4;">
-                    <div class="summary-value" id="week_total_pay">$0</div>
+                    <div class="summary-value" id="week_total_pay_summary">$0</div>
                     <div>Total Pay</div>
                 </div>
             `;
