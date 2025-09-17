@@ -436,17 +436,11 @@ let currentSunday = new Date(firstDay);
 if (currentSunday.getDay() !== 0) {
     currentSunday.setDate(currentSunday.getDate() - currentSunday.getDay());
 }
-    // Collect all Sundays that have days in this month
-    while (currentSunday <= lastDay) {
-        // Check if this Sunday's week has any days in the current month
-        const weekEnd = new Date(currentSunday);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-        
-        if (weekEnd >= firstDay && currentSunday <= lastDay) {
-            sundaysInMonth.push(new Date(currentSunday));
-        }
-        currentSunday.setDate(currentSunday.getDate() + 7);
-    }
+  // Collect all Sundays that have days in this month
+while (currentSunday <= lastDay) {
+    sundaysInMonth.push(new Date(currentSunday));
+    currentSunday.setDate(currentSunday.getDate() + 7);
+}
     
     // Fetch data for all weeks in the month
     let monthlyTotals = {};
