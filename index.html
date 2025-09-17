@@ -277,7 +277,7 @@
                 </div>
                 
       <div class="week-selector">
-    <label for="weekStarting">Week Starting (Sunday):</label>
+    <label for="weekStarting">Week of:</label>
     <div style="display: flex; align-items: center; gap: 10px;">
         <button type="button" onclick="changeWeek(-1)" style="background: #6b7280; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px;">◀</button>
         <input type="date" id="weekStarting" onchange="updateDayDates()" onblur="enforceSunday()" style="flex: 1;">
@@ -535,18 +535,15 @@ console.log('displayMonthlySummary called with:', JSON.stringify(totals, null, 2
     }
 }
 
-    function enforceSunday() {
+function enforceSunday() {
     const weekInput = document.getElementById('weekStarting');
     if (weekInput && weekInput.value) {
         const selectedDate = new Date(weekInput.value);
-        const dayOfWeek = selectedDate.getDay();
-        
-        if (dayOfWeek !== 0) {
-            const daysToSubtract = dayOfWeek;
-            selectedDate.setDate(selectedDate.getDate() - daysToSubtract);
-            weekInput.value = selectedDate.toISOString().split('T')[0];
-            updateDayDates();
-        }
+        // Always find the Sunday of the selected week (could be before or same day)
+        const sunday = new Date(selectedDate);
+        sunday.setDate(selectedDate.getDate() - selectedDate.getDay());
+        weekInput.value = sunday.toISOString().split('T')[0];
+        updateDayDates();
     }
 }
 function changeWeek(direction) {
