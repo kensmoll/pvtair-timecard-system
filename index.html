@@ -546,15 +546,15 @@ function changeWeek(direction) {
     if (!weekInput || !weekInput.value) return;
     
     const currentDate = new Date(weekInput.value);
-    currentDate.setDate(currentDate.getDate() + (direction * 7)); // Add or subtract 7 days
+    currentDate.setDate(currentDate.getDate() + (direction * 7));
     
     weekInput.value = currentDate.toISOString().split('T')[0];
     
     // Clear the form first
     clearTimecardForm();
     
-    // Then load data for the new week
-    updateDayDates();
+    // Load data for the new week (this will populate if data exists)
+    loadExistingTimecard();
 }
 function clearTimecardForm() {
     // Clear all radio buttons - set to 0
@@ -573,8 +573,16 @@ function clearTimecardForm() {
         input.value = '';
     });
     
-    // Reset all pay displays and totals
-    calculateTotals();
+    // Clear displays but don't recalculate yet
+    const payDisplays = document.querySelectorAll('.pay-display');
+    payDisplays.forEach(display => {
+        display.textContent = '$0.00';
+    });
+    
+    const dailyTotals = document.querySelectorAll('[id$="_total"]');
+    dailyTotals.forEach(total => {
+        total.textContent = 'Daily Total: $0.00';
+    });
 }
         async function loadEmployeeSelector() {
             try {
