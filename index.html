@@ -674,18 +674,8 @@ function updateDayDates() {
     const weekStartInput = document.getElementById('weekStarting');
     if (!weekStartInput || !weekStartInput.value) return;
     
-    const weekStart = new Date(weekStartInput.value);
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    
-    days.forEach((day, index) => {
-        const dateElement = document.getElementById(`${day}Date`);
-        if (dateElement) {
-            const date = new Date(weekStart);
-            date.setDate(date.getDate() + index);
-            dateElement.textContent = date.toLocaleDateString();
-        }
-    });
-    
+    // Don't show individual dates since the week structure is flexible
+    // Just load existing timecard data for the selected week
     loadExistingTimecard();
 }
     function generateWeekSummary() {
