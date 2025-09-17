@@ -485,8 +485,7 @@ async function updateMonthlySummary() {
 }
 
 function displayMonthlySummary(totals) {
-       console.log('displayMonthlySummary called with:', totals);  // ADD THIS LINE
- let totalHours = 0;
+console.log('displayMonthlySummary called with:', JSON.stringify(totals, null, 2)); let totalHours = 0;
     let totalDays = 0;
     let totalPay = 0;
 
