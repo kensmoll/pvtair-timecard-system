@@ -278,7 +278,7 @@
                 </div>
                 
                 <div class="week-selector">
-                    <label for="weekStarting">Week Starting (Sunday):</label>
+<label for="weekStarting">Week Starting:</label>
                     <input type="date" id="weekStarting" onchange="updateDayDates()">
                 </div>
                 
@@ -423,15 +423,13 @@
             setupWeekDefault();
         });
 
-        function setupWeekDefault() {
-            const today = new Date();
-            const sunday = new Date(today);
-            sunday.setDate(today.getDate() - today.getDay());
-            const weekInput = document.getElementById('weekStarting');
-            if (weekInput) {
-                weekInput.value = sunday.toISOString().split('T')[0];
-            }
-        }
+    function setupWeekDefault() {
+    const today = new Date();
+    const weekInput = document.getElementById('weekStarting');
+    if (weekInput) {
+        weekInput.value = today.toISOString().split('T')[0];
+    }
+}
 
         async function loadEmployeeSelector() {
             try {
@@ -672,25 +670,24 @@
             calculateTotals();
         }
 
-        function updateDayDates() {
-            const weekStartInput = document.getElementById('weekStarting');
-            if (!weekStartInput || !weekStartInput.value) return;
-            
-            const weekStart = new Date(weekStartInput.value);
-            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-            
-  days.forEach((day, index) => {
-    const dateElement = document.getElementById(`${day}Date`);
-    if (dateElement) {
-        const date = new Date(weekStart);
-        date.setDate(date.getDate() + index);
-        dateElement.textContent = date.toLocaleDateString();
-    }
-});
-            
-            loadExistingTimecard();
+function updateDayDates() {
+    const weekStartInput = document.getElementById('weekStarting');
+    if (!weekStartInput || !weekStartInput.value) return;
+    
+    const weekStart = new Date(weekStartInput.value);
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    
+    days.forEach((day, index) => {
+        const dateElement = document.getElementById(`${day}Date`);
+        if (dateElement) {
+            const date = new Date(weekStart);
+            date.setDate(date.getDate() + index);
+            dateElement.textContent = date.toLocaleDateString();
         }
-
+    });
+    
+    loadExistingTimecard();
+}
     function generateWeekSummary() {
     const container = document.getElementById('weekSummary');
     
