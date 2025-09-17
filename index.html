@@ -414,6 +414,7 @@
         });
 async function updateMonthlySummary() {
         console.log('updateMonthlySummary called');  // ADD THIS LINE
+    console.log('Current week starting:', weekStarting, 'Month:', currentDate.getMonth(), 'Year:', currentDate.getFullYear());  // ADD THIS LINE
     if (!currentEmployee) return;
     
     const weekStarting = document.getElementById('weekStarting').value;
@@ -426,6 +427,7 @@ async function updateMonthlySummary() {
     
     // Find all Sundays in the current month
     const sundaysInMonth = [];
+    console.log('Sundays found for month:', sundaysInMonth.map(d => d.toISOString().split('T')[0]));  // ADD THIS LINE
     const firstDay = new Date(currentYear, currentMonth, 1);
     const lastDay = new Date(currentYear, currentMonth + 1, 0);
     
