@@ -440,7 +440,120 @@
     <script>
 // Use shared database instance
 let adminDatabase;
+// Global data storage
+        let systemData = {
+            employees: [],
+            supervisors: [],
+            timecards: [],
+            stats: {}
+        };
 
+        // Supervisor authentication
+        let currentSupervisor = null;
+
+        async function checkSupervisorAuthentication() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const supervisorId = urlParams.get('supervisor');
+            
+            if (!supervisorId) {
+                showSupervisorLogin();
+                return;
+            }
+            
+            // If supervisor ID in URL, verify it's valid
+            try {
+                const supervisors = await adminDatabase.getSupervisors();
+                const supervisor = supervisors.find(s => s.supervisor_id == supervisorId);
+                
+                if (supervisor) {
+                    currentSupervisor = supervisor;
+                    document.querySelector('.page-title').textContent = `Admin Dashboard - ${supervisor.name}`;
+                    loadSystemData();
+                } else {
+                    showSupervisorLogin();
+                }
+            } catch (error) {
+                showSupervisorLogin();
+            }
+        }
+
+        function showSupervisorLogin() {
+            const content = document.querySelector('.content');
+            content.innerHTML = `
+                <div style="max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                    <h2 style="text-align: center; color: #1f2937; margin-bottom: 20px;">Supervisor Login</h2>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px;">Supervisor:</label>
+                        <select id="supervisorSelect" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                            <option value="">Loading supervisors...</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px;">PIN:</label>
+                        <input type="password" id="supervisorPin" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; text-align: center;" placeholder="Enter PIN" maxlength="4">
+                    </div>
+                    
+                    <button onclick="validateSupervisorLogin()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Login</button>
+                    
+                    <div id="loginError" style="color: #dc2626; text-align: center; margin-top: 15px; display: none;"></div>
+                </div>
+            `;
+            
+            loadSupervisorOptions();
+        }
+
+        async function loadSupervisorOptions() {
+            try {
+                const supervisors = await adminDatabase.getSupervisors();
+                const select = document.getElementById('supervisorSelect');
+                
+                select.innerHTML = '<option value="">Choose supervisor...</option>';
+                supervisors.forEach(supervisor => {
+                    select.innerHTML += `<option value="${supervisor.supervisor_id}">${supervisor.name} - ${supervisor.title}</option>`;
+                });
+            } catch (error) {
+                document.getElementById('supervisorSelect').innerHTML = '<option value="">Error loading supervisors</option>';
+            }
+        }
+
+        async function validateSupervisorLogin() {
+            const supervisorId = document.getElementById('supervisorSelect').value;
+            const pin = document.getElementById('supervisorPin').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (!supervisorId || !pin) {
+                errorDiv.textContent = 'Please select supervisor and enter PIN';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const params = new URLSearchParams();
+                params.append('action', 'validateSupervisorLogin');
+                params.append('data', JSON.stringify({ supervisor_id: parseInt(supervisorId), pin: pin }));
+                
+                const response = await fetch(`${adminDatabase.scriptUrl}?${params.toString()}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.href = `?supervisor=${supervisorId}`;
+                } else {
+                    errorDiv.textContent = 'Invalid PIN';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Login error';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Admin dashboard loaded, checking authentication...');
+            checkSupervisorAuthentication();
+        });
 // Wait for shared database to be ready
 window.addEventListener('databaseReady', function() {
     adminDatabase = window.database;
@@ -454,11 +567,11 @@ window.addEventListener('databaseReady', function() {
             stats: {}
         };
 
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Admin dashboard loaded, initializing...');
-            loadSystemData();
-        });
+      // Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Admin dashboard loaded, checking authentication...');
+    checkSupervisorAuthentication();
+});
 
         // Load all system data from Google Sheets
         async function loadSystemData() {
