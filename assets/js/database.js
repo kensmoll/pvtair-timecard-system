@@ -524,6 +524,27 @@ class PVTAIRDatabase {
      * Get connection status
      * @returns {boolean} Connection status
      */
+    /**
+ * Clear cache (placeholder method)
+ */
+clearCache() {
+    // No cache implementation currently
+    console.log('Cache cleared (no cache currently implemented)');
+}
+
+/**
+ * Reconnect to database
+ */
+async reconnect() {
+    try {
+        this.isConnected = false;
+        await this.init();
+        console.log('Database reconnected successfully');
+    } catch (error) {
+        console.error('Failed to reconnect to database:', error);
+        throw error;
+    }
+}
     isConnectionHealthy() {
         return this.isConnected && this.lastConnectionTest && 
                (Date.now() - this.lastConnectionTest.getTime()) < 300000; // 5 minutes
