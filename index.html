@@ -1265,7 +1265,8 @@ const monthlyData = await calculateMonthlyTotals(monthYear);
     }
 
     // Prepare submission data
-    const submissionData = {
+    // Prepare submission data
+const submissionData = {
     employee_id: currentEmployee.id,
     employee_name: currentEmployee.name,
     week_starting: monthYear + '-01',
@@ -1274,8 +1275,7 @@ const monthlyData = await calculateMonthlyTotals(monthYear);
     submitted_date: new Date().toISOString().split('T')[0],
     submitted_time: new Date().toLocaleTimeString(),
     total_hours: monthlyData.totalHours,
-    total_pay: monthlyData.totalPay,
-    ...monthlyData
+    total_pay: monthlyData.totalPay
 };
 
     try {
