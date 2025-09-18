@@ -743,7 +743,68 @@ function displayTimecardReview(timecards, employees) {
 
     content.innerHTML = reviewHTML;
 }
+async function approveTimecard(employeeId, weekStarting) {
+    if (!confirm('Are you sure you want to approve this timecard?')) {
+        return;
+    }
+    
+    try {
+        showAlert('Approving timecard...', 'info');
+        
+        const result = await adminDatabase.updateTimecardStatus(
+            `${employeeId}_${weekStarting}`,
+            'approved',
+            currentSupervisor.supervisor_id,
+            'Approved by supervisor'
+        );
+        
+        if (result.success) {
+            showAlert('Timecard approved successfully', 'success');
+            // Refresh the review interface
+            openTimecardReview();
+        } else {
+            showAlert('Failed to approve timecard: ' + result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error approving timecard:', error);
+        showAlert('Error approving timecard', 'error');
+    }
+}
 
+async function rejectTimecard(employeeId, weekStarting) {
+    const reason = prompt('Please provide a reason for rejection:');
+    if (!reason) {
+        return;
+    }
+    
+    try {
+        showAlert('Rejecting timecard...', 'info');
+        
+        const result = await adminDatabase.updateTimecardStatus(
+            `${employeeId}_${weekStarting}`,
+            'rejected',
+            currentSupervisor.supervisor_id,
+            reason
+        );
+        
+        if (result.success) {
+            showAlert('Timecard rejected successfully', 'success');
+            // Refresh the review interface
+            openTimecardReview();
+        } else {
+            showAlert('Failed to reject timecard: ' + result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error rejecting timecard:', error);
+        showAlert('Error rejecting timecard', 'error');
+    }
+}
+
+function viewTimecardDetails(employeeId, weekStarting) {
+    showAlert('Timecard details view coming soon...', 'info');
+    // TODO: Implement detailed timecard view
+    console.log('View details for:', employeeId, weekStarting);
+}
         function openReportsAnalytics() {
             showAlert('Opening reports and analytics...', 'info');
             console.log('Reports and analytics opened');
