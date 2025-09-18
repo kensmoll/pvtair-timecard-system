@@ -1353,11 +1353,11 @@ if (result.success && result.data) {
     const actualDate = new Date(sunday);
     actualDate.setDate(actualDate.getDate() + dayIndex);
     
-    // Only count hours if the day falls within the target month
-    if (actualDate.getMonth() === currentMonth && actualDate.getFullYear() === currentYear) {
-        weekCategoryHours += hours;
-    }
-});
+// Only count hours if the day falls within the target month
+if (actualDate.getMonth() === (parseInt(month) - 1) && actualDate.getFullYear() === parseInt(year)) {
+    weekCategoryHours += hours;
+}
+                   });
                     
                     monthlyTotals[category.id].hours += weekCategoryHours;
                     monthlyTotals[category.id].pay += weekCategoryHours * rate;
