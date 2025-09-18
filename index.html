@@ -1266,14 +1266,17 @@ const monthlyData = await calculateMonthlyTotals(monthYear);
 
     // Prepare submission data
     const submissionData = {
-        employee_id: currentEmployee.id,
-        employee_name: currentEmployee.name,
-        month: selectedMonth,
-        status: 'submitted_monthly',
-        submitted_date: new Date().toISOString().split('T')[0],
-        submitted_time: new Date().toLocaleTimeString(),
-        ...monthlyData
-    };
+    employee_id: currentEmployee.id,
+    employee_name: currentEmployee.name,
+    week_starting: monthYear + '-01',
+    month: monthYear,
+    status: 'submitted_monthly',
+    submitted_date: new Date().toISOString().split('T')[0],
+    submitted_time: new Date().toLocaleTimeString(),
+    total_hours: monthlyData.totalHours,
+    total_pay: monthlyData.totalPay,
+    ...monthlyData
+};
 
     try {
         const submitBtn = document.querySelector('button[onclick="submitMonthlyTimecard()"]');
