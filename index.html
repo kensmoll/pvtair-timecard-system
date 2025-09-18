@@ -453,6 +453,13 @@ async function updateMonthlySummary() {
     const currentDate = new Date(weekStarting);
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
+    // Update the monthly summary title with the current month
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const monthName = monthNames[currentMonth];
+const titleElement = document.getElementById('monthlySummaryTitle');
+if (titleElement) {
+    titleElement.textContent = `Monthly Summary - ${monthName} ${currentYear}`;
+}
     
     // Find all Sundays in the current month
     const sundaysInMonth = [];
@@ -936,7 +943,7 @@ function generateMonthlySummary() {
 
     let monthlySummaryHTML = `
         <div class="week-summary" style="margin-top: 15px; background: #fefce8; border: 2px solid #fbbf24;">
-            <h4 style="color: #92400e;">Monthly Summary</h4>
+            <h4 style="color: #92400e;" id="monthlySummaryTitle">Monthly Summary</h4>
             <div class="summary-grid" id="monthlySummary">
     `;
 
