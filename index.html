@@ -1216,10 +1216,12 @@ function generateMonthlySummary() {
             const timecardData = collectTimecardData(weekStarting, 'submitted');
 
             try {
-                const submitBtn = event.target;
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Submitting...';
-                submitBtn.disabled = true;
+                const submitBtn = document.querySelector('button[onclick="submitMonthlyTimecard()"]');
+if (submitBtn) {
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Submitting...';
+    submitBtn.disabled = true;
+}
 
                 const result = await database.submitTimecard(timecardData);
                 
@@ -1274,9 +1276,11 @@ const monthlyData = await calculateMonthlyTotals(monthYear);
     };
 
     try {
-        const submitBtn = event.target;
-        submitBtn.textContent = 'Submitting...';
-        submitBtn.disabled = true;
+        const submitBtn = document.querySelector('button[onclick="submitMonthlyTimecard()"]');
+if (submitBtn) {
+    submitBtn.textContent = 'Submitting...';
+    submitBtn.disabled = true;
+}
 
         const result = await database.submitTimecard(submissionData);
         
