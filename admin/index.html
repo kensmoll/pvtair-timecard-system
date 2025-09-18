@@ -717,7 +717,7 @@ function displayTimecardReview(timecards, employees) {
                 </div>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                    <div><strong>Month:</strong> ${(timecard.month && timecard.month.includes('-') ? timecard.month : timecard.week_starting || timecard.date)}</div>
+                    <div><strong>Month:</strong> ${timecard.month ? timecard.month.substring(0, 7) : (timecard.week_starting || timecard.date).substring(0, 7)}</div>
 <div><strong>Total Hours:</strong> ${timecard.totalHours || timecard.total_hours || 0}</div>
 <div><strong>Total Pay:</strong> $${(timecard.totalPay || timecard.total_pay || 0).toFixed(2)}</div>
                     <div><strong>Submitted:</strong> ${timecard.submitted_date}</div>
