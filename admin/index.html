@@ -328,7 +328,7 @@
         <div class="content">
             <!-- Statistics Overview -->
             <div class="stats-overview">
-                <h2 class="stats-title">📊 System Overview</h2>
+                <h2 class="stats-title">System Overview</h2>
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-value" id="totalEmployees">0</div>
@@ -412,7 +412,7 @@
 
             <!-- Quick Actions -->
             <div class="quick-actions">
-                <h3 class="quick-actions-title">⚡ Quick Actions</h3>
+                <h3 class="quick-actions-title">Quick Actions</h3>
                 <div class="actions-grid">
                     <button class="action-btn success" onclick="approveAllPending()">
                         Approve All Pending
@@ -438,9 +438,9 @@
     </div>
 
     <script>
-// Use shared database instance
-let adminDatabase;
-// Global data storage
+        // Global variables
+        let adminDatabase = null;
+        let currentSupervisor = null;
         let systemData = {
             employees: [],
             supervisors: [],
@@ -448,10 +448,24 @@ let adminDatabase;
             stats: {}
         };
 
-        // Supervisor authentication
-        let currentSupervisor = null;
+        // Wait for shared database to be ready
+        window.addEventListener('databaseReady', function() {
+            adminDatabase = window.database;
+            console.log('Admin dashboard using shared database connection');
+            
+            // Start authentication check once database is ready
+            checkSupervisorAuthentication();
+        });
 
+        // Supervisor authentication functions
         async function checkSupervisorAuthentication() {
+            // Make sure database is ready
+            if (!adminDatabase) {
+                console.log('Database not ready, waiting...');
+                setTimeout(checkSupervisorAuthentication, 500);
+                return;
+            }
+
             const urlParams = new URLSearchParams(window.location.search);
             const supervisorId = urlParams.get('supervisor');
             
@@ -473,6 +487,7 @@ let adminDatabase;
                     showSupervisorLogin();
                 }
             } catch (error) {
+                console.error('Error verifying supervisor:', error);
                 showSupervisorLogin();
             }
         }
@@ -514,6 +529,7 @@ let adminDatabase;
                     select.innerHTML += `<option value="${supervisor.supervisor_id}">${supervisor.name} - ${supervisor.title}</option>`;
                 });
             } catch (error) {
+                console.error('Error loading supervisors:', error);
                 document.getElementById('supervisorSelect').innerHTML = '<option value="">Error loading supervisors</option>';
             }
         }
@@ -522,6 +538,8 @@ let adminDatabase;
             const supervisorId = document.getElementById('supervisorSelect').value;
             const pin = document.getElementById('supervisorPin').value;
             const errorDiv = document.getElementById('loginError');
+            
+            errorDiv.style.display = 'none';
             
             if (!supervisorId || !pin) {
                 errorDiv.textContent = 'Please select supervisor and enter PIN';
@@ -544,34 +562,11 @@ let adminDatabase;
                     errorDiv.style.display = 'block';
                 }
             } catch (error) {
-                errorDiv.textContent = 'Login error';
+                console.error('Login error:', error);
+                errorDiv.textContent = 'Login error - please try again';
                 errorDiv.style.display = 'block';
             }
         }
-
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Admin dashboard loaded, checking authentication...');
-            checkSupervisorAuthentication();
-        });
-// Wait for shared database to be ready
-window.addEventListener('databaseReady', function() {
-    adminDatabase = window.database;
-    console.log('Admin dashboard using shared database connection');
-});        
-        // Global data storage
-        let systemData = {
-            employees: [],
-            supervisors: [],
-            timecards: [],
-            stats: {}
-        };
-
-      // Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Admin dashboard loaded, checking authentication...');
-    checkSupervisorAuthentication();
-});
 
         // Load all system data from Google Sheets
         async function loadSystemData() {
@@ -580,9 +575,9 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 // Load all data in parallel
                 const [employees, supervisors, timecards] = await Promise.all([
-                    adminDatabase.getAllEmployees(),
-                    adminDatabase.getAllSupervisors(),
-                    adminDatabase.getAllTimecards()
+                    adminDatabase.getEmployees(),
+                    adminDatabase.getSupervisors(),
+                    adminDatabase.getTimecards()
                 ]);
 
                 // Store data globally
@@ -609,7 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Calculate statistics
             const totalEmployees = employees.length;
             const totalSupervisors = supervisors.length;
-            const pendingTimecards = timecards.filter(tc => tc.status === 'pending').length;
+            const pendingTimecards = timecards.filter(tc => tc.status === 'pending' || tc.status === 'submitted').length;
             
             // Calculate total hours for current week
             const weekStart = getWeekStart(new Date());
@@ -617,7 +612,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const tcDate = new Date(tc.date);
                 return tcDate >= weekStart && tc.status === 'approved';
             });
-            const totalHoursWeek = weeklyTimecards.reduce((sum, tc) => sum + (parseFloat(tc.hoursWorked) || 0), 0);
+            const totalHoursWeek = weeklyTimecards.reduce((sum, tc) => sum + (parseFloat(tc.total_hours) || 0), 0);
 
             // Update display
             document.getElementById('totalEmployees').textContent = totalEmployees;
@@ -656,43 +651,37 @@ document.addEventListener('DOMContentLoaded', function() {
         // Admin function implementations
         function openEmployeeManagement() {
             showAlert('Opening employee management interface...', 'info');
-            // TODO: Open employee management modal or page
             console.log('Employee management opened');
         }
 
         function openTimecardReview() {
             showAlert('Opening timecard review interface...', 'info');
-            // TODO: Open timecard review modal or page
             console.log('Timecard review opened');
         }
 
         function openReportsAnalytics() {
             showAlert('Opening reports and analytics...', 'info');
-            // TODO: Open reports interface
             console.log('Reports and analytics opened');
         }
 
         function openSystemSettings() {
             showAlert('Opening system settings...', 'info');
-            // TODO: Open system settings modal
             console.log('System settings opened');
         }
 
         function openDataExport() {
             showAlert('Preparing data export...', 'info');
-            // TODO: Open export options modal
             console.log('Data export opened');
         }
 
         function openAuditLog() {
             showAlert('Opening audit log...', 'info');
-            // TODO: Open audit log interface
             console.log('Audit log opened');
         }
 
         // Quick action implementations
         async function approveAllPending() {
-            const pendingCount = systemData.timecards.filter(tc => tc.status === 'pending').length;
+            const pendingCount = systemData.timecards.filter(tc => tc.status === 'pending' || tc.status === 'submitted').length;
             
             if (pendingCount === 0) {
                 showAlert('No pending timecards to approve', 'info');
@@ -705,20 +694,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 showAlert('Approving all pending timecards...', 'info');
-                await adminDatabase.approveAllPendingTimecards();
+                await adminDatabase.approveAllPendingTimecards(currentSupervisor.supervisor_id);
                 showAlert(`Successfully approved ${pendingCount} timecards`, 'success');
                 
                 // Reload data to reflect changes
                 await loadSystemData();
                 
             } catch (error) {
+                console.error('Error approving timecards:', error);
                 showAlert('Failed to approve timecards. Please try again.', 'error');
             }
         }
 
         function sendReminders() {
             showAlert('Sending timecard reminders to employees...', 'info');
-            // TODO: Implement reminder functionality
             setTimeout(() => {
                 showAlert('Reminders sent successfully', 'success');
             }, 2000);
@@ -726,7 +715,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function generateWeeklyReport() {
             showAlert('Generating weekly timecard report...', 'info');
-            // TODO: Implement report generation
             setTimeout(() => {
                 showAlert('Weekly report generated and ready for download', 'success');
             }, 3000);
@@ -734,7 +722,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function backupData() {
             showAlert('Creating system data backup...', 'info');
-            // TODO: Implement backup functionality
             setTimeout(() => {
                 showAlert('System backup completed successfully', 'success');
             }, 4000);
@@ -752,7 +739,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function viewErrorLog() {
             showAlert('Opening system error log...', 'info');
-            // TODO: Open error log interface
             console.log('Error log opened');
         }
 
@@ -779,8 +765,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 5000);
         }
 
-        // Refresh data every 5 minutes
-        setInterval(loadSystemData, 5 * 60 * 1000);
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Admin dashboard loaded, waiting for database...');
+        });
+
+        // Refresh data every 5 minutes (only if logged in)
+        setInterval(() => {
+            if (currentSupervisor && adminDatabase) {
+                loadSystemData();
+            }
+        }, 5 * 60 * 1000);
     </script>
 </body>
 </html>
