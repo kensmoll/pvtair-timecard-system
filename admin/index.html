@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PVTAIR - Admin Dashboard</title>
+    <script src="../assets/js/database.js"></script>
     <style>
         * {
             margin: 0;
@@ -437,87 +438,14 @@
     </div>
 
     <script>
-        // PVTAIR Admin Database - Google Sheets Integration
-        class PVTAIRAdminDatabase {
-            constructor() {
-                this.spreadsheetId = '1Jo39kWkJcNF-LEymNXmL8PgjipoEDvByyeI71YiElIs';
-                this.scriptUrl = 'https://script.google.com/macros/s/AKfycbywtkqW4sWEdw6rOvMoIDLWV_UqC1UiF97_KZW5myAbaQzTwtVevVRDNo2cgBALK7VP/exec';
-            }
+// Use shared database instance
+let adminDatabase;
 
-            async getSystemStats() {
-                try {
-                    const response = await fetch(`${this.scriptUrl}?action=getSystemStats`);
-                    const result = await response.json();
-                    return result.data || {};
-                } catch (error) {
-                    console.error('Failed to load system stats:', error);
-                    throw error;
-                }
-            }
-
-            async getAllEmployees() {
-                try {
-                    const response = await fetch(`${this.scriptUrl}?action=getEmployees`);
-                    const result = await response.json();
-                    return result.data || [];
-                } catch (error) {
-                    console.error('Failed to load employees:', error);
-                    throw error;
-                }
-            }
-
-            async getAllSupervisors() {
-                try {
-                    const response = await fetch(`${this.scriptUrl}?action=getSupervisors`);
-                    const result = await response.json();
-                    return result.data || [];
-                } catch (error) {
-                    console.error('Failed to load supervisors:', error);
-                    throw error;
-                }
-            }
-
-            async getAllTimecards() {
-                try {
-                    const response = await fetch(`${this.scriptUrl}?action=getTimecards`);
-                    const result = await response.json();
-                    return result.data || [];
-                } catch (error) {
-                    console.error('Failed to load timecards:', error);
-                    throw error;
-                }
-            }
-
-            async approveAllPendingTimecards() {
-                try {
-                    const response = await fetch(this.scriptUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'approveAllPending' })
-                    });
-                    const result = await response.json();
-                    return result;
-                } catch (error) {
-                    console.error('Failed to approve timecards:', error);
-                    throw error;
-                }
-            }
-
-            async exportData(type = 'all') {
-                try {
-                    const response = await fetch(`${this.scriptUrl}?action=exportData&type=${type}`);
-                    const result = await response.json();
-                    return result;
-                } catch (error) {
-                    console.error('Failed to export data:', error);
-                    throw error;
-                }
-            }
-        }
-
-        // Initialize database
-        const adminDatabase = new PVTAIRAdminDatabase();
-        
+// Wait for shared database to be ready
+window.addEventListener('databaseReady', function() {
+    adminDatabase = window.database;
+    console.log('Admin dashboard using shared database connection');
+});        
         // Global data storage
         let systemData = {
             employees: [],
