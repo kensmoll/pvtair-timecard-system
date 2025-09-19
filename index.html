@@ -767,12 +767,13 @@ function displayPayRates() {
     payCategories.forEach(category => {
         const rate = currentEmployee[category.rateField];
         if (rate && parseFloat(rate) > 0) {
-            if (category.id === 'base_salary') {
-                ratesHTML += `${category.label}: ${parseFloat(rate).toLocaleString()}/month<br>`;
-            } else {
-                ratesHTML += `${category.label}: ${parseFloat(rate).toFixed(2)}/hr<br>`;
-            }
-        }
+if (category.id === 'base_salary') {
+    ratesHTML += `${category.label}: ${parseFloat(rate).toLocaleString()}/month<br>`;
+} else if (category.type === 'radio') {
+    ratesHTML += `${category.label}: ${parseFloat(rate).toFixed(2)}/day<br>`;
+} else {
+    ratesHTML += `${category.label}: ${parseFloat(rate).toFixed(2)}/hr<br>`;
+}        }
     });
     
     container.innerHTML = ratesHTML;
