@@ -860,13 +860,7 @@ currentDate.setDate(currentDate.getDate() + index);
                 }
             });
             
-loadExistingTimecard().then(() => {
-    // Small delay to ensure all elements are rendered
-    setTimeout(() => {
-        updateMonthlySummary();
-    }, 100);
-});
-        }
+loadExistingTimecard();        }
 
         function generateWeekSummary() {
             const container = document.getElementById('weekSummary');
