@@ -807,36 +807,72 @@ async function viewTimecardDetails(employeeId, weekStarting) {
         // Extract month/year from the date
         const date = new Date(weekStarting);
         const year = date.getFullYear();
-        const month = date.getMonth(); // 0-based (September = 8)
+        const month = date.getMonth(); // 0-based
         
-        // Search using first day of month (works around Monday bias)
-        const monthStart = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+        // Use the same logic as the timecard system
+        const startDate = new Date(year, month, 1);
+        const endDate = new Date(year, month + 1, 0);
         
-        const params = new URLSearchParams();
-        params.append('action', 'getExistingTimecard');
-        params.append('data', JSON.stringify({ 
-            employee_id: employeeId, 
-            week_starting: monthStart 
-        }));
-
-        const response = await fetch(`${adminDatabase.scriptUrl}?${params.toString()}`);
-        const result = await response.json();
-        
-        if (result.success && result.data) {
-            const employees = await adminDatabase.getEmployees();
-            const employee = employees.find(emp => emp.id === employeeId);
-            const employeeName = employee ? employee.name : employeeId;
-            
-            displaySimpleMonthlyTimecard(result.data, employeeName);
-        } else {
-            showAlert('No timecard data found', 'error');
+        // Find all Sundays in the month (same as timecard system)
+        const sundaysInMonth = [];
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+            if (d.getDay() === 0) { // Sunday
+                sundaysInMonth.push(new Date(d));
+            }
         }
+        
+        // Fetch data for each Sunday (same as timecard system)
+        const weeklyData = [];
+        for (const sunday of sundaysInMonth) {
+            const weekString = sunday.toISOString().split('T')[0];
+            
+            const params = new URLSearchParams();
+            params.append('action', 'getExistingTimecard');
+            params.append('data', JSON.stringify({ 
+                employee_id: employeeId, 
+                week_starting: weekString 
+            }));
+
+            let response = await fetch(`${adminDatabase.scriptUrl}?${params.toString()}`);
+            let result = await response.json();
+            
+            // Handle Monday bias (same as timecard system)
+            if (!result.success || !result.data) {
+                const altSunday = new Date(sunday);
+                altSunday.setDate(altSunday.getDate() + 1);
+                const altWeekString = altSunday.toISOString().split('T')[0];
+                
+                const altParams = new URLSearchParams();
+                altParams.append('action', 'getExistingTimecard');
+                altParams.append('data', JSON.stringify({ 
+                    employee_id: employeeId, 
+                    week_starting: altWeekString 
+                }));
+                
+                response = await fetch(`${adminDatabase.scriptUrl}?${altParams.toString()}`);
+                result = await response.json();
+            }
+            
+            if (result.success && result.data) {
+                weeklyData.push({
+                    weekOf: weekString,
+                    data: result.data
+                });
+            }
+        }
+        
+        const employees = await adminDatabase.getEmployees();
+        const employee = employees.find(emp => emp.id === employeeId);
+        const employeeName = employee ? employee.name : employeeId;
+        
+        displayWeeklyBreakdownForReview(weeklyData, employeeName, year, month);
         
     } catch (error) {
         console.error('Error loading timecard details:', error);
         showAlert('Error loading timecard details', 'error');
     }
-}function displayMonthlyTimecardDetails(weeklyData, employeeName, year, month) {
+}
+        function displayMonthlyTimecardDetails(weeklyData, employeeName, year, month) {
     const content = document.querySelector('.content');
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const monthName = monthNames[month];
