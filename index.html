@@ -332,14 +332,14 @@
     <script>
         // Global variables
         let currentEmployee = null;
-        const payCategories = [
-            { id: 'rev_flight', label: 'Rev Flight', rateField: 'rate_rev_flight', type: 'radio' },
-            { id: 'non_rev_flight_exc', label: 'Non-Rev EXC', rateField: 'rate_non_rev_flight_exc', type: 'radio' },
-            { id: 'non_rev_non_flight', label: 'Non-Rev Non-Flight', rateField: 'rate_non_rev_non_flight', type: 'radio' },
-            { id: 'mx_hourly', label: 'Maintenance', rateField: 'rate_mx_hourly', type: 'hours' },
-            { id: 'admin_hourly', label: 'Admin', rateField: 'rate_admin_hourly', type: 'hours' }
-        ];
-
+const payCategories = [
+    { id: 'base_salary', label: 'Base Salary', rateField: 'base_salary', type: 'salary' },
+    { id: 'rev_flight', label: 'Rev Flight', rateField: 'rate_rev_flight', type: 'radio' },
+    { id: 'non_rev_flight_exc', label: 'Non-Rev EXC', rateField: 'rate_non_rev_flight_exc', type: 'radio' },
+    { id: 'non_rev_non_flight', label: 'Non-Rev Non-Flight', rateField: 'rate_non_rev_non_flight', type: 'radio' },
+    { id: 'mx_hourly', label: 'Maintenance', rateField: 'rate_mx_hourly', type: 'hours' },
+    { id: 'admin_hourly', label: 'Admin', rateField: 'rate_admin_hourly', type: 'hours' }
+];
         // Database configuration
         class TimecardDatabase {
             constructor() {
