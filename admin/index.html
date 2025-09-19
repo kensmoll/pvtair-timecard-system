@@ -957,6 +957,69 @@ async function viewTimecardDetails(employeeId, weekStarting) {
     
     content.innerHTML = detailsHTML;
 }
+function displaySimpleMonthlyTimecard(timecardData, employeeName) {
+    const content = document.querySelector('.content');
+    
+    const categories = [
+        { id: 'rev_flight', label: 'Rev Flight' },
+        { id: 'non_rev_flight_exc', label: 'Non-Rev EXC' },
+        { id: 'non_rev_non_flight', label: 'Non-Rev Non-Flight' },
+        { id: 'mx_hourly', label: 'Maintenance' },
+        { id: 'admin_hourly', label: 'Admin' }
+    ];
+    
+    let detailsHTML = `
+        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <h2>Monthly Timecard - ${employeeName}</h2>
+            <button onclick="openTimecardReview()" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Back to Review</button>
+        </div>
+        
+        <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <h3 style="margin-bottom: 15px;">Monthly Summary</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+    `;
+    
+    // Show each category's total
+    categories.forEach(category => {
+        const totalHours = parseFloat(timecardData[`total_${category.id}_hours`]) || 0;
+        const totalPay = parseFloat(timecardData[`total_${category.id}_pay`]) || 0;
+        
+        if (totalHours > 0) {
+            detailsHTML += `
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #bbf7d0;">
+                    <div style="font-size: 1.5em; font-weight: 600; color: #166534;">${totalHours}</div>
+                    <div style="color: #166534; margin: 5px 0;">${category.label}</div>
+                    <div style="color: #166534; font-size: 0.9em;">$${totalPay.toFixed(2)}</div>
+                </div>
+            `;
+        }
+    });
+    
+    detailsHTML += `
+            </div>
+            
+            <div style="background: #fef3c7; padding: 20px; border-radius: 8px; text-align: center; border: 2px solid #f59e0b;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
+                    <div>
+                        <div style="font-size: 2em; font-weight: 600; color: #92400e;">${timecardData.total_hours || 0}</div>
+                        <div style="color: #92400e;">Total Hours</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2em; font-weight: 600; color: #92400e;">$${(timecardData.total_pay || 0).toFixed(2)}</div>
+                        <div style="color: #92400e;">Total Pay</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.2em; font-weight: 600; color: #92400e;">${timecardData.status || 'Unknown'}</div>
+                        <div style="color: #92400e;">Status</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    content.innerHTML = detailsHTML;
+}
         function displayTimecardDetails(timecardData, employeeName) {
     const content = document.querySelector('.content');
     
