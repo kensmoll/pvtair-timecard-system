@@ -926,10 +926,10 @@ const categories = [
         
         // Display each week
         weeklyData.forEach((week, index) => {
-            const weekDate = new Date(week.weekOf);
-            const weekEndDate = new Date(weekDate);
-            weekEndDate.setDate(weekDate.getDate() + 6);
-            
+const weekDate = new Date(week.weekOf);
+weekDate.setDate(weekDate.getDate() + 1); // Add one day to correct the Monday bias
+const weekEndDate = new Date(weekDate);
+weekEndDate.setDate(weekDate.getDate() + 6);            
             detailsHTML += `
                 <div style="border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 15px; overflow: hidden;">
                     <div style="background: #f8fafc; padding: 10px; border-bottom: 1px solid #e5e7eb;">
