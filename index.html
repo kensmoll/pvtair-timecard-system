@@ -530,7 +530,14 @@ if (result.success && result.data) {
             console.error('Error fetching week data for monthly summary:', error);
         }
     }
+    
     console.log('About to call displayMonthlySummary with monthlyTotals:', monthlyTotals);  // ADD THIS LINE
+    // Add base salary once per month (not accumulated from daily entries)
+    if (currentEmployee.base_salary && parseFloat(currentEmployee.base_salary) > 0) {
+        const baseSalary = parseFloat(currentEmployee.base_salary);
+        monthlyTotals.base_salary.hours = 1; // Show as 1 unit for display
+        monthlyTotals.base_salary.pay = baseSalary;
+    }
     // Update the monthly summary display
     displayMonthlySummary(monthlyTotals);
 }
