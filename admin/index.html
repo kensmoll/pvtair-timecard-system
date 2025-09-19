@@ -615,10 +615,15 @@
             const totalHoursWeek = weeklyTimecards.reduce((sum, tc) => sum + (parseFloat(tc.total_hours) || 0), 0);
 
             // Update display
-            document.getElementById('totalEmployees').textContent = totalEmployees;
-            document.getElementById('totalSupervisors').textContent = totalSupervisors;
-            document.getElementById('pendingTimecards').textContent = pendingTimecards;
-            document.getElementById('totalHoursWeek').textContent = Math.round(totalHoursWeek);
+            const totalEmployeesEl = document.getElementById('totalEmployees');
+const totalSupervisorsEl = document.getElementById('totalSupervisors');
+const pendingTimecardsEl = document.getElementById('pendingTimecards');
+const totalHoursWeekEl = document.getElementById('totalHoursWeek');
+
+if (totalEmployeesEl) totalEmployeesEl.textContent = totalEmployees;
+if (totalSupervisorsEl) totalSupervisorsEl.textContent = totalSupervisors;
+if (pendingTimecardsEl) pendingTimecardsEl.textContent = pendingTimecards;
+if (totalHoursWeekEl) totalHoursWeekEl.textContent = Math.round(totalHoursWeek);
             
             // System status indicator
             const statusElement = document.getElementById('systemStatus');
@@ -632,13 +637,21 @@
         }
 
         function displayErrorStats() {
-            document.getElementById('totalEmployees').textContent = '?';
-            document.getElementById('totalSupervisors').textContent = '?';
-            document.getElementById('pendingTimecards').textContent = '?';
-            document.getElementById('totalHoursWeek').textContent = '?';
-            document.getElementById('systemStatus').textContent = '●';
-            document.getElementById('systemStatus').style.color = '#ef4444';
-        }
+    const totalEmployeesEl = document.getElementById('totalEmployees');
+    const totalSupervisorsEl = document.getElementById('totalSupervisors');
+    const pendingTimecardsEl = document.getElementById('pendingTimecards');
+    const totalHoursWeekEl = document.getElementById('totalHoursWeek');
+    const systemStatusEl = document.getElementById('systemStatus');
+
+    if (totalEmployeesEl) totalEmployeesEl.textContent = '?';
+    if (totalSupervisorsEl) totalSupervisorsEl.textContent = '?';
+    if (pendingTimecardsEl) pendingTimecardsEl.textContent = '?';
+    if (totalHoursWeekEl) totalHoursWeekEl.textContent = '?';
+    if (systemStatusEl) {
+        systemStatusEl.textContent = '●';
+        systemStatusEl.style.color = '#ef4444';
+    }
+}
 
         // Utility function to get week start date
         function getWeekStart(date) {
