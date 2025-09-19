@@ -604,7 +604,7 @@
             // Calculate statistics
             const totalEmployees = employees.length;
             const totalSupervisors = supervisors.length;
-            const pendingTimecards = timecards.filter(tc => tc.status === 'pending' || tc.status === 'submitted').length;
+            const pendingTimecards = timecards.filter(tc => tc.status === 'pending' || tc.status === 'submitted' || tc.status === 'submitted_monthly').length;
             
             // Calculate total hours for current week
             const weekStart = getWeekStart(new Date());
@@ -701,7 +701,7 @@ function displayTimecardReview(timecards, employees) {
     let reviewHTML = `
         <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
             <h2>Timecard Review - ${timecards.length} Pending</h2>
-            <button onclick="checkSupervisorAuthentication()" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Back to Dashboard</button>
+            <button onclick="location.reload()" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Back to Dashboard</button>
         </div>
     `;
 
