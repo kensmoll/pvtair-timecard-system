@@ -891,14 +891,14 @@ function displayWeeklyBreakdownForReview(weeklyData, employeeName, year, month) 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const monthName = monthNames[month];
     
-    const categories = [
-        { id: 'rev_flight', label: 'Rev Flight' },
-        { id: 'non_rev_flight_exc', label: 'Non-Rev EXC' },
-        { id: 'non_rev_non_flight', label: 'Non-Rev Non-Flight' },
-        { id: 'mx_hourly', label: 'Maintenance' },
-        { id: 'admin_hourly', label: 'Admin' }
-    ];
-    
+const categories = [
+    { id: 'base_salary', label: 'Base Salary' },
+    { id: 'rev_flight', label: 'Rev Flight' },
+    { id: 'non_rev_flight_exc', label: 'Non-Rev EXC' },
+    { id: 'non_rev_non_flight', label: 'Non-Rev Non-Flight' },
+    { id: 'mx_hourly', label: 'Maintenance' },
+    { id: 'admin_hourly', label: 'Admin' }
+];    
     let detailsHTML = `
         <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
             <h2>Monthly Review - ${employeeName}</h2>
