@@ -1288,11 +1288,14 @@ if (submitBtn) {
         const result = await database.submitTimecard(submissionData);
         
         if (result.success) {
-            showSuccess(`Monthly timecard for ${selectedMonth} submitted successfully!`);
-            document.getElementById('submitMonth').value = '';
-        } else {
-            showError('Failed to submit monthly timecard: ' + (result.message || 'Unknown error'));
-        }
+    showSuccess(`Monthly timecard for ${selectedMonth} submitted successfully!`);
+    document.getElementById('submitMonth').value = '';
+    
+    // Send notification to supervisor
+    sendNotificationToSupervisor(currentEmployee, monthYear);
+} else {
+    showError('Failed to submit monthly timecard: ' + (result.message || 'Unknown error'));
+}
     } catch (error) {
         showError('Error submitting monthly timecard: ' + error.message);
     } finally {
@@ -1493,6 +1496,33 @@ async function validateSupervisorLogin() {
     } catch (error) {
         errorDiv.textContent = 'Login error: ' + error.message;
         errorDiv.style.display = 'block';
+    }
+}
+async function sendNotificationToSupervisor(employee, month) {
+    try {
+        // Get supervisor information
+        const employees = await database.getEmployees();
+        const supervisors = await database.getSupervisors();
+        
+        const emp = employees.find(e => e.id === employee.id);
+        const supervisor = supervisors.find(s => s.supervisor_id == emp.supervisor_id);
+        
+        if (supervisor && supervisor.email) {
+            const notificationData = {
+                supervisorEmail: supervisor.email,
+                supervisorName: supervisor.name,
+                employeeName: employee.name,
+                month: month
+            };
+            
+            const params = new URLSearchParams();
+            params.append('action', 'sendSupervisorNotification');
+            params.append('data', JSON.stringify(notificationData));
+            
+            await fetch(`${database.scriptUrl}?${params.toString()}`);
+        }
+    } catch (error) {
+        console.error('Failed to send supervisor notification:', error);
     }
 }
     </script>
