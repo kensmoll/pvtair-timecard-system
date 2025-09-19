@@ -1291,12 +1291,9 @@ if (submitBtn) {
         
         if (result.success) {
     showSuccess(`Monthly timecard for ${selectedMonth} submitted successfully!`);
-    document.getElementById('submitMonth').value = '';
-            console.log('About to send supervisor notification...');
+document.getElementById('submitMonth').value = '';
+console.log('About to send supervisor notification...');
 sendNotificationToSupervisor(currentEmployee, monthYear);
-    
-    // Send notification to supervisor
-    sendNotificationToSupervisor(currentEmployee, monthYear);
 } else {
     showError('Failed to submit monthly timecard: ' + (result.message || 'Unknown error'));
 }
