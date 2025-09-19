@@ -815,7 +815,7 @@ async function viewTimecardDetails(employeeId, weekStarting) {
         const response = await fetch(`${adminDatabase.scriptUrl}?${params.toString()}`);
         const result = await response.json();
         
-        console.log('Raw timecard data:', result.data); // DEBUG LINE TO SEE ACTUAL DATA
+        console.log('Raw timecard data:', JSON.stringify(result.data, null, 2)); // DEBUG LINE TO SEE ACTUAL DATA
         
         const employees = await adminDatabase.getEmployees();
         
