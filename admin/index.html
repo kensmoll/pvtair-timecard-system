@@ -872,6 +872,139 @@ async function viewTimecardDetails(employeeId, weekStarting) {
         showAlert('Error loading timecard details', 'error');
     }
 }
+function displayWeeklyBreakdownForReview(weeklyData, employeeName, year, month) {
+    const content = document.querySelector('.content');
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthName = monthNames[month];
+    
+    const categories = [
+        { id: 'rev_flight', label: 'Rev Flight' },
+        { id: 'non_rev_flight_exc', label: 'Non-Rev EXC' },
+        { id: 'non_rev_non_flight', label: 'Non-Rev Non-Flight' },
+        { id: 'mx_hourly', label: 'Maintenance' },
+        { id: 'admin_hourly', label: 'Admin' }
+    ];
+    
+    let detailsHTML = `
+        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <h2>Monthly Review - ${employeeName}</h2>
+            <button onclick="openTimecardReview()" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Back to Review</button>
+        </div>
+        
+        <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <h3 style="margin-bottom: 15px; color: #1f2937;">${monthName} ${year} - Week by Week Breakdown</h3>
+    `;
+    
+    if (weeklyData.length === 0) {
+        detailsHTML += `
+            <div style="text-align: center; padding: 40px; color: #6b7280;">
+                <p>No weekly timecard data found for ${monthName} ${year}</p>
+            </div>
+        `;
+    } else {
+        // Calculate totals for verification
+        let monthTotals = {};
+        categories.forEach(cat => {
+            monthTotals[cat.id] = 0;
+        });
+        let grandTotalHours = 0;
+        let grandTotalPay = 0;
+        
+        // Display each week
+        weeklyData.forEach((week, index) => {
+            const weekDate = new Date(week.weekOf);
+            const weekEndDate = new Date(weekDate);
+            weekEndDate.setDate(weekDate.getDate() + 6);
+            
+            detailsHTML += `
+                <div style="border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 15px; overflow: hidden;">
+                    <div style="background: #f8fafc; padding: 10px; border-bottom: 1px solid #e5e7eb;">
+                        <strong>Week ${index + 1}: ${weekDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()}</strong>
+                    </div>
+                    <div style="padding: 15px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 10px;">
+            `;
+            
+            // Show category totals for this week
+            let weekTotal = 0;
+            categories.forEach(category => {
+                const weekHours = parseFloat(week.data[`total_${category.id}_hours`]) || 0;
+                const weekPay = parseFloat(week.data[`total_${category.id}_pay`]) || 0;
+                
+                monthTotals[category.id] += weekHours;
+                weekTotal += weekHours;
+                
+                if (weekHours > 0) {
+                    detailsHTML += `
+                        <div style="background: #f0fdf4; padding: 8px; border-radius: 4px; text-align: center; border: 1px solid #bbf7d0;">
+                            <div style="font-weight: 600; color: #166534;">${weekHours}</div>
+                            <div style="font-size: 11px; color: #166534;">${category.label}</div>
+                            <div style="font-size: 10px; color: #166534;">$${weekPay.toFixed(2)}</div>
+                        </div>
+                    `;
+                } else {
+                    detailsHTML += `
+                        <div style="background: #f9fafb; padding: 8px; border-radius: 4px; text-align: center; border: 1px solid #e5e7eb;">
+                            <div style="font-weight: 600; color: #9ca3af;">0</div>
+                            <div style="font-size: 11px; color: #9ca3af;">${category.label}</div>
+                            <div style="font-size: 10px; color: #9ca3af;">$0.00</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            grandTotalHours += weekTotal;
+            grandTotalPay += parseFloat(week.data.total_pay) || 0;
+            
+            detailsHTML += `
+                        </div>
+                        <div style="text-align: right; padding-top: 10px; border-top: 1px solid #e5e7eb;">
+                            <strong>Week Total: ${weekTotal} hours | $${(parseFloat(week.data.total_pay) || 0).toFixed(2)}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        // Monthly summary for verification
+        detailsHTML += `
+                <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px solid #f59e0b; border-radius: 8px; padding: 20px; margin-top: 20px;">
+                    <h4 style="color: #92400e; margin-bottom: 15px;">Monthly Totals - Verification</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+        `;
+        
+        categories.forEach(category => {
+            if (monthTotals[category.id] > 0) {
+                detailsHTML += `
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5em; font-weight: 600; color: #92400e;">${monthTotals[category.id]}</div>
+                        <div style="color: #92400e; font-size: 12px;">${category.label}</div>
+                    </div>
+                `;
+            }
+        });
+        
+        detailsHTML += `
+                        <div style="text-align: center; background: white; padding: 10px; border-radius: 6px;">
+                            <div style="font-size: 1.8em; font-weight: 600; color: #166534;">${grandTotalHours}</div>
+                            <div style="color: #166534;">Total Hours</div>
+                        </div>
+                        <div style="text-align: center; background: white; padding: 10px; border-radius: 6px;">
+                            <div style="font-size: 1.8em; font-weight: 600; color: #166534;">$${grandTotalPay.toFixed(2)}</div>
+                            <div style="color: #166534;">Total Pay</div>
+                        </div>
+                    </div>
+                </div>
+        `;
+    }
+    
+    detailsHTML += `
+        </div>
+    `;
+    
+    content.innerHTML = detailsHTML;
+}
+        
         function displayMonthlyTimecardDetails(weeklyData, employeeName, year, month) {
     const content = document.querySelector('.content');
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
