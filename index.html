@@ -1290,6 +1290,8 @@ if (submitBtn) {
         if (result.success) {
     showSuccess(`Monthly timecard for ${selectedMonth} submitted successfully!`);
     document.getElementById('submitMonth').value = '';
+            console.log('About to send supervisor notification...');
+sendNotificationToSupervisor(currentEmployee, monthYear);
     
     // Send notification to supervisor
     sendNotificationToSupervisor(currentEmployee, monthYear);
