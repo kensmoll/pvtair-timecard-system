@@ -820,35 +820,42 @@ async function viewTimecardDetails(employeeId, weekStarting) {
             currentSunday.setDate(currentSunday.getDate() - currentSunday.getDay());
         }
         
-        // Collect all Sundays that have days in this month
-        while (currentSunday <= lastDay) {
-            sundays.push(new Date(currentSunday));
-            currentSunday.setDate(currentSunday.getDate() + 7);
-        }
+// Collect all Sundays that have days in this month
+while (currentSunday <= lastDay) {
+    sundays.push(new Date(currentSunday));
+    currentSunday.setDate(currentSunday.getDate() + 7);
+}
+
+console.log('Sundays found for September 2025:', sundays.map(s => s.toISOString().split('T')[0])); // ADD THIS LINE
         
         // Fetch data for each week
         const weeklyData = [];
-        for (const sunday of sundays) {
-            const weekString = sunday.toISOString().split('T')[0];
-            
-            const params = new URLSearchParams();
-            params.append('action', 'getExistingTimecard');
-            params.append('data', JSON.stringify({ 
-                employee_id: employeeId, 
-                week_starting: weekString 
-            }));
+for (const sunday of sundays) {
+    const weekString = sunday.toISOString().split('T')[0];
+    
+    console.log('Fetching data for week:', weekString); // ADD THIS LINE
+    
+    const params = new URLSearchParams();
+    params.append('action', 'getExistingTimecard');
+    params.append('data', JSON.stringify({ 
+        employee_id: employeeId, 
+        week_starting: weekString 
+    }));
 
-            const response = await fetch(`${adminDatabase.scriptUrl}?${params.toString()}`);
-            const result = await response.json();
-            
-            if (result.success && result.data) {
-                weeklyData.push({
-                    weekOf: weekString,
-                    data: result.data
-                });
-            }
-        }
-        
+    const response = await fetch(`${adminDatabase.scriptUrl}?${params.toString()}`);
+    const result = await response.json();
+    
+    console.log('Result for week', weekString, ':', result.success, result.data ? 'has data' : 'no data'); // ADD THIS LINE
+    
+    if (result.success && result.data) {
+        weeklyData.push({
+            weekOf: weekString,
+            data: result.data
+        });
+    }
+}
+
+console.log('Total weeks with data:', weeklyData.length); // ADD THIS LINE        
         const employees = await adminDatabase.getEmployees();
         const employee = employees.find(emp => emp.id === employeeId);
         const employeeName = employee ? employee.name : employeeId;
