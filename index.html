@@ -276,7 +276,7 @@
                     <div id="payRates"></div>
                 </div>
                 
-      <div class="week-selector">
+<div class="week-selector">
     <label for="weekStarting">Week of:</label>
     <div style="display: flex; align-items: center; gap: 10px;">
         <button type="button" onclick="changeWeek(-1)" style="background: #6b7280; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px;">◀</button>
@@ -284,16 +284,18 @@
         <button type="button" onclick="changeWeek(1)" style="background: #6b7280; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px;">▶</button>
     </div>
 </div>
+
+<div style="text-align: center; margin: 15px 0;">
+    <button class="btn save" onclick="saveTimecard()">Save Progress</button>
+</div>
                 
-                <div id="dailyEntries" class="timecard-table"></div>
-                
+                <div id="dailyEntries" class="timecard-table"></div>                
                 <div class="week-summary">
                     <h4>Weekly Summary</h4>
                     <div class="summary-grid" id="weekSummary"></div>
                 </div>
                 
                <div class="button-row">
-    <button class="btn save" onclick="saveTimecard()">Save Progress</button>
     
    <div style="width: 100%; margin: 10px 0;">
     <label style="display: block; font-weight: 600; margin-bottom: 5px;">Submit Monthly Timecard For:</label>
