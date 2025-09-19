@@ -925,34 +925,78 @@ function displayWeeklyBreakdownForReview(weeklyData, employeeName, year, month) 
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 10px;">
             `;
             
-            // Show category totals for this week
-            let weekTotal = 0;
-            categories.forEach(category => {
-                const weekHours = parseFloat(week.data[`total_${category.id}_hours`]) || 0;
-                const weekPay = parseFloat(week.data[`total_${category.id}_pay`]) || 0;
-                
-                monthTotals[category.id] += weekHours;
-                weekTotal += weekHours;
-                
-                if (weekHours > 0) {
-                    detailsHTML += `
-                        <div style="background: #f0fdf4; padding: 8px; border-radius: 4px; text-align: center; border: 1px solid #bbf7d0;">
-                            <div style="font-weight: 600; color: #166534;">${weekHours}</div>
-                            <div style="font-size: 11px; color: #166534;">${category.label}</div>
-                            <div style="font-size: 10px; color: #166534;">$${weekPay.toFixed(2)}</div>
-                        </div>
-                    `;
-                } else {
-                    detailsHTML += `
-                        <div style="background: #f9fafb; padding: 8px; border-radius: 4px; text-align: center; border: 1px solid #e5e7eb;">
-                            <div style="font-weight: 600; color: #9ca3af;">0</div>
-                            <div style="font-size: 11px; color: #9ca3af;">${category.label}</div>
-                            <div style="font-size: 10px; color: #9ca3af;">$0.00</div>
-                        </div>
-                    `;
-                }
-            });
-            
+// Show daily breakdown first
+const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+detailsHTML += `
+    <div style="margin-bottom: 15px;">
+        <h5 style="margin-bottom: 8px; color: #374151;">Daily Breakdown:</h5>
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; font-size: 11px;">
+`;
+
+days.forEach((day, dayIndex) => {
+    const dayLower = day.toLowerCase();
+    let dayHours = 0;
+    let dayDetails = [];
+    
+    categories.forEach(category => {
+        const dailyHours = parseFloat(week.data[`${dayLower}_${category.id}`]) || 0;
+        if (dailyHours > 0) {
+            dayHours += dailyHours;
+            if (category.id.includes('rev_flight') || category.id.includes('non_rev')) {
+                // For flat rate categories, show as "on" days
+                dayDetails.push(`${category.label.replace('Rev Flight', 'Rev').replace('Non-Rev', 'NR')}`);
+            } else {
+                // For hourly categories, show hours
+                dayDetails.push(`${category.label.replace('Maintenance', 'Maint').replace('Admin', 'Adm')}: ${dailyHours}h`);
+            }
+        }
+    });
+    
+    const isActive = dayHours > 0;
+    detailsHTML += `
+        <div style="background: ${isActive ? '#f0fdf4' : '#f9fafb'}; padding: 6px 4px; border-radius: 4px; text-align: center; border: 1px solid ${isActive ? '#bbf7d0' : '#e5e7eb'};">
+            <div style="font-weight: 600; color: ${isActive ? '#166534' : '#9ca3af'}; margin-bottom: 2px;">${day.substr(0,3)}</div>
+            ${dayDetails.length > 0 ? `<div style="color: ${isActive ? '#166534' : '#9ca3af'}; font-size: 9px; line-height: 1.2;">${dayDetails.join('<br>')}</div>` : `<div style="color: #9ca3af;">-</div>`}
+        </div>
+    `;
+});
+
+detailsHTML += `
+        </div>
+    </div>
+`;
+
+// Show only active category totals for this week
+detailsHTML += `
+    <div style="margin-bottom: 10px;">
+        <h5 style="margin-bottom: 8px; color: #374151;">Week Summary:</h5>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
+`;
+
+let weekTotal = 0;
+categories.forEach(category => {
+    const weekHours = parseFloat(week.data[`total_${category.id}_hours`]) || 0;
+    const weekPay = parseFloat(week.data[`total_${category.id}_pay`]) || 0;
+    
+    monthTotals[category.id] += weekHours;
+    weekTotal += weekHours;
+    
+    // Only show categories with hours > 0
+    if (weekHours > 0) {
+        detailsHTML += `
+            <div style="background: #f0fdf4; padding: 8px; border-radius: 4px; text-align: center; border: 1px solid #bbf7d0;">
+                <div style="font-weight: 600; color: #166534;">${weekHours}</div>
+                <div style="font-size: 11px; color: #166534;">${category.label}</div>
+                <div style="font-size: 10px; color: #166534;">$${weekPay.toFixed(2)}</div>
+            </div>
+        `;
+    }
+});
+
+detailsHTML += `
+        </div>
+    </div>
+`;            
             grandTotalHours += weekTotal;
             grandTotalPay += parseFloat(week.data.total_pay) || 0;
             
