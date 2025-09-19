@@ -1501,8 +1501,11 @@ async function validateSupervisorLogin() {
 async function sendNotificationToSupervisor(employee, month) {
     try {
         // Get supervisor information
-        const employees = await database.getEmployees();
-        const supervisors = await database.getSupervisors();
+const response = await fetch(`${database.scriptUrl}?action=getSupervisors`);
+const supervisorResult = await response.json();
+const supervisors = supervisorResult.data || [];
+
+const employees = await database.getEmployees();
         
         const emp = employees.find(e => e.id === employee.id);
         const supervisor = supervisors.find(s => s.supervisor_id == emp.supervisor_id);
