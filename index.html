@@ -1241,6 +1241,8 @@ if (submitBtn) {
             }
         }
 async function submitMonthlyTimecard() {
+    if (this.submitting) return;
+this.submitting = true;
     if (!currentEmployee) {
         showError('No employee selected');
         return;
@@ -1301,6 +1303,9 @@ sendNotificationToSupervisor(currentEmployee, monthYear);
     } catch (error) {
         showError('Error submitting monthly timecard: ' + error.message);
     } finally {
+        this.submitting = false;
+    // existing finally code...
+}
         const submitBtn = document.querySelector('button[onclick="submitMonthlyTimecard()"]');
         if (submitBtn) {
             submitBtn.textContent = 'Submit Monthly Timecard';
