@@ -1020,18 +1020,29 @@ function generateMonthlySummary() {
                     const rate = parseFloat(currentEmployee[category.rateField]);
                     let hours = 0;
                     
-                    if (category.type === 'radio') {
-                        const selectedRadio = document.querySelector(`input[name="${day}_${category.id}"]:checked`);
-                        if (selectedRadio) {
-                            hours = parseFloat(selectedRadio.value) || 0;
-                        }
-                    } else {
-                        const hoursInput = document.getElementById(`${day}_${category.id}`);
-                        if (hoursInput) {
-                            hours = parseFloat(hoursInput.value) || 0;
-                        }
-                    }
-                    
+if (category.type === 'radio') {
+    const selectedRadio = document.querySelector(`input[name="${day}_${category.id}"]:checked`);
+    if (selectedRadio) {
+        hours = parseFloat(selectedRadio.value) || 0;
+    }
+} else if (category.type === 'salary') {
+    // Base salary appears on first day of month only
+    const weekStarting = document.getElementById('weekStarting').value;
+    const weekDate = new Date(weekStarting);
+    const dayIndex = days.indexOf(day);
+    const actualDate = new Date(weekDate);
+    actualDate.setDate(weekDate.getDate() + dayIndex);
+    
+    // Check if this is the 1st day of the month
+    if (actualDate.getDate() === 1) {
+        hours = 1; // Set to 1 to trigger the monthly salary display
+    }
+} else {
+    const hoursInput = document.getElementById(`${day}_${category.id}`);
+    if (hoursInput) {
+        hours = parseFloat(hoursInput.value) || 0;
+    }
+}                    
                     const pay = hours * rate;
                     
                     const payDisplay = document.getElementById(`${day}_${category.id}_pay`);
