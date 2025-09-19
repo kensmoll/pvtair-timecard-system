@@ -751,24 +751,27 @@ function clearTimecardForm() {
             generateDailyEntries();
         }
 
-        function displayPayRates() {
-            const container = document.getElementById('payRates');
-            let ratesHTML = '';
-            
-            if (currentEmployee.base_salary && parseFloat(currentEmployee.base_salary) > 0) {
-                ratesHTML += `Base Salary: ${parseFloat(currentEmployee.base_salary).toLocaleString()}/year<br>`;
+function displayPayRates() {
+    const container = document.getElementById('payRates');
+    let ratesHTML = '';
+    
+    if (currentEmployee.base_salary && parseFloat(currentEmployee.base_salary) > 0) {
+        ratesHTML += `Base Salary: ${parseFloat(currentEmployee.base_salary).toLocaleString()}/month<br>`;
+    }
+    
+    payCategories.forEach(category => {
+        const rate = currentEmployee[category.rateField];
+        if (rate && parseFloat(rate) > 0) {
+            if (category.id === 'base_salary') {
+                ratesHTML += `${category.label}: ${parseFloat(rate).toLocaleString()}/month<br>`;
+            } else {
+                ratesHTML += `${category.label}: ${parseFloat(rate).toFixed(2)}/hr<br>`;
             }
-            
-            payCategories.forEach(category => {
-                const rate = currentEmployee[category.rateField];
-                if (rate && parseFloat(rate) > 0) {
-                    ratesHTML += `${category.label}: ${parseFloat(rate).toFixed(2)}/hr<br>`;
-                }
-            });
-            
-            container.innerHTML = ratesHTML;
         }
-
+    });
+    
+    container.innerHTML = ratesHTML;
+}
         function generateDailyEntries() {
             const container = document.getElementById('dailyEntries');
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
