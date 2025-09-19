@@ -929,6 +929,7 @@ const categories = [
 const weekDate = new Date(week.weekOf);
 weekDate.setDate(weekDate.getDate() + 1); // Add one day to correct the Monday bias
 const weekEndDate = new Date(weekDate);
+weekEndDate.setDate(weekDate.getDate() + 6);
 weekEndDate.setDate(weekDate.getDate() + 6);            
             detailsHTML += `
                 <div style="border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 15px; overflow: hidden;">
