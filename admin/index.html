@@ -625,16 +625,17 @@ if (totalSupervisorsEl) totalSupervisorsEl.textContent = totalSupervisors;
 if (pendingTimecardsEl) pendingTimecardsEl.textContent = pendingTimecards;
 if (totalHoursWeekEl) totalHoursWeekEl.textContent = Math.round(totalHoursWeek);
             
-            // System status indicator
-            const statusElement = document.getElementById('systemStatus');
-            if (totalEmployees > 0 && timecards.length > 0) {
-                statusElement.textContent = '●';
-                statusElement.style.color = '#10b981';
-            } else {
-                statusElement.textContent = '●';
-                statusElement.style.color = '#f59e0b';
-            }
-        }
+// System status indicator
+const statusElement = document.getElementById('systemStatus');
+if (statusElement) {
+    if (totalEmployees > 0 && timecards.length > 0) {
+        statusElement.textContent = '●';
+        statusElement.style.color = '#10b981';
+    } else {
+        statusElement.textContent = '●';
+        statusElement.style.color = '#f59e0b';
+    }
+}
 
         function displayErrorStats() {
     const totalEmployeesEl = document.getElementById('totalEmployees');
