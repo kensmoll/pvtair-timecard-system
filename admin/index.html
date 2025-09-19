@@ -805,7 +805,15 @@ async function viewTimecardDetails(employeeId, weekStarting) {
         showAlert('Loading timecard details...', 'info');
         
         // Get the specific timecard data
-        const result = await adminDatabase.getExistingTimecard(employeeId, weekStarting.split('T')[0]);
+        const params = new URLSearchParams();
+params.append('action', 'getExistingTimecard');
+params.append('data', JSON.stringify({ 
+    employee_id: employeeId, 
+    week_starting: weekStarting.split('T')[0] 
+}));
+
+const response = await fetch(`${adminDatabase.scriptUrl}?${params.toString()}`);
+const result = await response.json();
         const employees = await adminDatabase.getEmployees();
         
         const employee = employees.find(emp => emp.id === employeeId);
