@@ -772,10 +772,9 @@ function displayPayRates() {
             const container = document.getElementById('dailyEntries');
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             
-            const activeCategories = payCategories.filter(cat => 
-                currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
-            );
-
+const activeCategories = payCategories.filter(cat => 
+    currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0 && cat.type !== 'salary'
+);
             if (activeCategories.length === 0) {
                 container.innerHTML = '<div class="error">No pay categories found for this employee.</div>';
                 return;
