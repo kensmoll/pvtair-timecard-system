@@ -802,39 +802,65 @@ async function rejectTimecard(employeeId, weekStarting) {
 
 async function viewTimecardDetails(employeeId, weekStarting) {
     try {
-        showAlert('Loading timecard details...', 'info');
+        showAlert('Loading monthly timecard details...', 'info');
         
-        // Get the specific timecard data using direct API call
-        const params = new URLSearchParams();
-        params.append('action', 'getExistingTimecard');
-        params.append('data', JSON.stringify({ 
-            employee_id: employeeId, 
-            week_starting: weekStarting.split('T')[0] 
-        }));
+        // Extract month/year from the weekStarting date
+        const date = new Date(weekStarting);
+        const year = date.getFullYear();
+        const month = date.getMonth(); // 0-based
+        
+        // Find all Sundays in this month
+        const sundays = [];
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        
+        // Find first Sunday of the month (or previous Sunday if month doesn't start on Sunday)
+        let currentSunday = new Date(firstDay);
+        if (currentSunday.getDay() !== 0) {
+            currentSunday.setDate(currentSunday.getDate() - currentSunday.getDay());
+        }
+        
+        // Collect all Sundays that have days in this month
+        while (currentSunday <= lastDay) {
+            sundays.push(new Date(currentSunday));
+            currentSunday.setDate(currentSunday.getDate() + 7);
+        }
+        
+        // Fetch data for each week
+        const weeklyData = [];
+        for (const sunday of sundays) {
+            const weekString = sunday.toISOString().split('T')[0];
+            
+            const params = new URLSearchParams();
+            params.append('action', 'getExistingTimecard');
+            params.append('data', JSON.stringify({ 
+                employee_id: employeeId, 
+                week_starting: weekString 
+            }));
 
-        const response = await fetch(`${adminDatabase.scriptUrl}?${params.toString()}`);
-        const result = await response.json();
-        
-        console.log('Raw timecard data:', JSON.stringify(result.data, null, 2)); // DEBUG LINE TO SEE ACTUAL DATA
+            const response = await fetch(`${adminDatabase.scriptUrl}?${params.toString()}`);
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                weeklyData.push({
+                    weekOf: weekString,
+                    data: result.data
+                });
+            }
+        }
         
         const employees = await adminDatabase.getEmployees();
-        
         const employee = employees.find(emp => emp.id === employeeId);
         const employeeName = employee ? employee.name : employeeId;
         
-        if (!result.success || !result.data) {
-            showAlert('No timecard data found for this week', 'error');
-            return;
-        }
-        
-        displayTimecardDetails(result.data, employeeName);
+        displayMonthlyTimecardDetails(weeklyData, employeeName, year, month);
         
     } catch (error) {
         console.error('Error loading timecard details:', error);
         showAlert('Error loading timecard details', 'error');
     }
 }
-function displayTimecardDetails(timecardData, employeeName) {
+        function displayTimecardDetails(timecardData, employeeName) {
     const content = document.querySelector('.content');
     
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
