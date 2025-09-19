@@ -800,10 +800,129 @@ async function rejectTimecard(employeeId, weekStarting) {
     }
 }
 
-function viewTimecardDetails(employeeId, weekStarting) {
-    showAlert('Timecard details view coming soon...', 'info');
-    // TODO: Implement detailed timecard view
-    console.log('View details for:', employeeId, weekStarting);
+async function viewTimecardDetails(employeeId, weekStarting) {
+    try {
+        showAlert('Loading timecard details...', 'info');
+        
+        // Get the specific timecard data
+        const result = await adminDatabase.getExistingTimecard(employeeId, weekStarting.split('T')[0]);
+        const employees = await adminDatabase.getEmployees();
+        
+        const employee = employees.find(emp => emp.id === employeeId);
+        const employeeName = employee ? employee.name : employeeId;
+        
+        if (!result.success || !result.data) {
+            showAlert('No timecard data found for this week', 'error');
+            return;
+        }
+        
+        displayTimecardDetails(result.data, employeeName);
+        
+    } catch (error) {
+        console.error('Error loading timecard details:', error);
+        showAlert('Error loading timecard details', 'error');
+    }
+}
+
+function displayTimecardDetails(timecardData, employeeName) {
+    const content = document.querySelector('.content');
+    
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const categories = [
+        { id: 'rev_flight', label: 'Rev Flight' },
+        { id: 'non_rev_flight_exc', label: 'Non-Rev EXC' },
+        { id: 'non_rev_non_flight', label: 'Non-Rev Non-Flight' },
+        { id: 'mx_hourly', label: 'Maintenance' },
+        { id: 'admin_hourly', label: 'Admin' }
+    ];
+    
+    let detailsHTML = `
+        <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <h2>Timecard Details - ${employeeName}</h2>
+            <button onclick="openTimecardReview()" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Back to Review</button>
+        </div>
+        
+        <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <h3 style="margin-bottom: 15px;">Week of ${timecardData.date}</h3>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <thead>
+                        <tr style="background: #f8fafc;">
+                            <th style="border: 1px solid #e5e7eb; padding: 8px; text-align: left;">Day</th>
+    `;
+    
+    // Add category headers
+    categories.forEach(category => {
+        detailsHTML += `<th style="border: 1px solid #e5e7eb; padding: 8px; text-align: center;">${category.label}</th>`;
+    });
+    
+    detailsHTML += `
+                            <th style="border: 1px solid #e5e7eb; padding: 8px; text-align: center;">Daily Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    `;
+    
+    // Add daily rows
+    days.forEach((day, index) => {
+        const dayLower = day.toLowerCase();
+        let dailyTotal = 0;
+        
+        detailsHTML += `
+            <tr>
+                <td style="border: 1px solid #e5e7eb; padding: 8px; font-weight: 600;">${day}</td>
+        `;
+        
+        categories.forEach(category => {
+            const fieldName = `${dayLower}_${category.id}`;
+            const hours = parseFloat(timecardData[fieldName]) || 0;
+            dailyTotal += hours;
+            
+            detailsHTML += `<td style="border: 1px solid #e5e7eb; padding: 8px; text-align: center;">${hours > 0 ? hours : '-'}</td>`;
+        });
+        
+        detailsHTML += `
+                <td style="border: 1px solid #e5e7eb; padding: 8px; text-align: center; font-weight: 600;">${dailyTotal > 0 ? dailyTotal : '-'}</td>
+            </tr>
+        `;
+    });
+    
+    detailsHTML += `
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5em; font-weight: 600; color: #166534;">
+                        ${timecardData.total_hours || 0}
+                    </div>
+                    <div style="color: #166534;">Total Hours</div>
+                </div>
+                <div style="background: #fef3c7; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5em; font-weight: 600; color: #92400e;">
+                        $${(timecardData.total_pay || 0).toFixed(2)}
+                    </div>
+                    <div style="color: #92400e;">Total Pay</div>
+                </div>
+                <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.2em; font-weight: 600; color: #0277bd;">
+                        ${timecardData.status || 'Pending'}
+                    </div>
+                    <div style="color: #0277bd;">Status</div>
+                </div>
+                <div style="background: #f3e8ff; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.2em; font-weight: 600; color: #7c3aed;">
+                        ${timecardData.submitted_date || 'Not submitted'}
+                    </div>
+                    <div style="color: #7c3aed;">Submitted</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    content.innerHTML = detailsHTML;
 }
         function openReportsAnalytics() {
             showAlert('Opening reports and analytics...', 'info');
