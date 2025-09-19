@@ -804,70 +804,39 @@ async function viewTimecardDetails(employeeId, weekStarting) {
     try {
         showAlert('Loading monthly timecard details...', 'info');
         
-        // Extract month/year from the weekStarting date
+        // Extract month/year from the date
         const date = new Date(weekStarting);
         const year = date.getFullYear();
-        const month = date.getMonth(); // 0-based
+        const month = date.getMonth(); // 0-based (September = 8)
         
-        // Find all Sundays in this month
-        const sundays = [];
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
+        // Search using first day of month (works around Monday bias)
+        const monthStart = `${year}-${String(month + 1).padStart(2, '0')}-01`;
         
-        // Find first Sunday of the month (or previous Sunday if month doesn't start on Sunday)
-        let currentSunday = new Date(firstDay);
-        if (currentSunday.getDay() !== 0) {
-            currentSunday.setDate(currentSunday.getDate() - currentSunday.getDay());
+        const params = new URLSearchParams();
+        params.append('action', 'getExistingTimecard');
+        params.append('data', JSON.stringify({ 
+            employee_id: employeeId, 
+            week_starting: monthStart 
+        }));
+
+        const response = await fetch(`${adminDatabase.scriptUrl}?${params.toString()}`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            const employees = await adminDatabase.getEmployees();
+            const employee = employees.find(emp => emp.id === employeeId);
+            const employeeName = employee ? employee.name : employeeId;
+            
+            displaySimpleMonthlyTimecard(result.data, employeeName);
+        } else {
+            showAlert('No timecard data found', 'error');
         }
-        
-// Collect all Sundays that have days in this month
-while (currentSunday <= lastDay) {
-    sundays.push(new Date(currentSunday));
-    currentSunday.setDate(currentSunday.getDate() + 7);
-}
-
-console.log('Sundays found for September 2025:', sundays.map(s => s.toISOString().split('T')[0])); // ADD THIS LINE
-        
-        // Fetch data for each week
-        const weeklyData = [];
-for (const sunday of sundays) {
-    const weekString = sunday.toISOString().split('T')[0];
-    
-    console.log('Fetching data for week:', weekString); // ADD THIS LINE
-    
-    const params = new URLSearchParams();
-    params.append('action', 'getExistingTimecard');
-    params.append('data', JSON.stringify({ 
-        employee_id: employeeId, 
-        week_starting: weekString 
-    }));
-
-    const response = await fetch(`${adminDatabase.scriptUrl}?${params.toString()}`);
-    const result = await response.json();
-    
-    console.log('Result for week', weekString, ':', result.success, result.data ? 'has data' : 'no data'); // ADD THIS LINE
-    
-    if (result.success && result.data) {
-        weeklyData.push({
-            weekOf: weekString,
-            data: result.data
-        });
-    }
-}
-
-console.log('Total weeks with data:', weeklyData.length); // ADD THIS LINE        
-        const employees = await adminDatabase.getEmployees();
-        const employee = employees.find(emp => emp.id === employeeId);
-        const employeeName = employee ? employee.name : employeeId;
-        
-        displayMonthlyTimecardDetails(weeklyData, employeeName, year, month);
         
     } catch (error) {
         console.error('Error loading timecard details:', error);
         showAlert('Error loading timecard details', 'error');
     }
-}
-function displayMonthlyTimecardDetails(weeklyData, employeeName, year, month) {
+}function displayMonthlyTimecardDetails(weeklyData, employeeName, year, month) {
     const content = document.querySelector('.content');
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const monthName = monthNames[month];
