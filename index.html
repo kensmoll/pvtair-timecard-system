@@ -755,10 +755,6 @@ function displayPayRates() {
     const container = document.getElementById('payRates');
     let ratesHTML = '';
     
-    if (currentEmployee.base_salary && parseFloat(currentEmployee.base_salary) > 0) {
-        ratesHTML += `Base Salary: ${parseFloat(currentEmployee.base_salary).toLocaleString()}/month<br>`;
-    }
-    
     payCategories.forEach(category => {
         const rate = currentEmployee[category.rateField];
         if (rate && parseFloat(rate) > 0) {
