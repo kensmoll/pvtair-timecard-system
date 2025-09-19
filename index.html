@@ -1304,14 +1304,13 @@ sendNotificationToSupervisor(currentEmployee, monthYear);
         showError('Error submitting monthly timecard: ' + error.message);
     } finally {
         this.submitting = false;
-    // existing finally code...
-}
         const submitBtn = document.querySelector('button[onclick="submitMonthlyTimecard()"]');
         if (submitBtn) {
             submitBtn.textContent = 'Submit Monthly Timecard';
             submitBtn.disabled = false;
         }
     }
+        
 }
         async function calculateMonthlyTotals(monthYear) {
     if (!currentEmployee) return { totalHours: 0, totalPay: 0 };
