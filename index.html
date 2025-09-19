@@ -580,7 +580,13 @@ console.log('displayMonthlySummary called with:', JSON.stringify(totals, null, 2
     const totalPayElement = document.getElementById('month_total_pay_summary');
     
     if (totalDaysElement) totalDaysElement.textContent = totalDays.toFixed(1);
-    if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
+if (totalHoursElement) {
+    if (overtimeHours > 0) {
+        totalHoursElement.textContent = `Reg: ${regularHours.toFixed(1)} + OT: ${overtimeHours.toFixed(1)} = ${totalHours.toFixed(1)}`;
+    } else {
+        totalHoursElement.textContent = totalHours.toFixed(1);
+    }
+}
     if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(2)}`;
 }
  function setupWeekDefault() {
@@ -1081,21 +1087,53 @@ if (category.type === 'radio') {
                 currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
             );
 
-            activeCategories.forEach(category => {
-                const hoursElement = document.getElementById(`week_${category.id}_hours_summary`);
-                
-                if (hoursElement && totals[category.id]) {
-                    hoursElement.textContent = totals[category.id].hours.toFixed(1);
-                    
-                    if (category.type === 'radio') {
-                        totalDays += totals[category.id].hours;
-                    } else {
-                        totalHours += totals[category.id].hours;
-                    }
-                    totalPay += totals[category.id].pay;
-                }
-            });
+// Calculate overtime before processing categories
+const hourlyCategories = ['exc_hourly', 'mx_hourly', 'admin_hourly'];
+let regularHours = 0;
+let overtimeHours = 0;
+let overtimePay = 0;
 
+// First pass: calculate total hourly hours for overtime
+hourlyCategories.forEach(catId => {
+    if (totals[catId]) {
+        regularHours += totals[catId].hours;
+    }
+});
+
+// Calculate overtime if over 40 hours
+if (regularHours > 40) {
+    overtimeHours = regularHours - 40;
+    regularHours = 40;
+    
+    // Calculate overtime pay at 150% for each category
+    hourlyCategories.forEach(catId => {
+        if (totals[catId] && totals[catId].hours > 0) {
+            const category = payCategories.find(cat => cat.id === catId);
+            const rate = parseFloat(currentEmployee[category.rateField]);
+            const categoryRatio = totals[catId].hours / (regularHours + overtimeHours);
+            const categoryOvertimeHours = overtimeHours * categoryRatio;
+            const categoryOvertimePay = categoryOvertimeHours * rate * 0.5; // Additional 50%
+            
+            totals[catId].pay += categoryOvertimePay;
+            overtimePay += categoryOvertimePay;
+        }
+    });
+}
+
+activeCategories.forEach(category => {
+    const hoursElement = document.getElementById(`week_${category.id}_hours_summary`);
+    
+    if (hoursElement && totals[category.id]) {
+        hoursElement.textContent = totals[category.id].hours.toFixed(1);
+        
+        if (category.type === 'radio') {
+            totalDays += totals[category.id].hours;
+        } else if (category.type !== 'salary') {
+            totalHours += totals[category.id].hours;
+        }
+        totalPay += totals[category.id].pay;
+    }
+});
             // Update totals based on what elements exist
             const totalDaysElement = document.getElementById('week_total_days_summary');
             const totalHoursElement = document.getElementById('week_total_hours_summary');
