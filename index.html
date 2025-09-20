@@ -559,21 +559,20 @@ console.log('displayMonthlySummary called with:', JSON.stringify(totals, null, 2
         currentEmployee[cat.rateField] && parseFloat(currentEmployee[cat.rateField]) > 0
     );
 
-    activeCategories.forEach(category => {
-        const hoursElement = document.getElementById(`month_${category.id}_hours_summary`);
+activeCategories.forEach(category => {
+    const hoursElement = document.getElementById(`month_${category.id}_hours_summary`);
+    
+    if (hoursElement && totals[category.id]) {
+        hoursElement.textContent = totals[category.id].hours.toFixed(1);
         
-        if (hoursElement && totals[category.id]) {
-            hoursElement.textContent = totals[category.id].hours.toFixed(1);
-            
-            if (category.type === 'radio') {
-                totalDays += totals[category.id].hours;
-            } else {
-                totalHours += totals[category.id].hours;
-            }
-            totalPay += totals[category.id].pay;
+        if (category.type === 'radio') {
+            totalDays += totals[category.id].hours;
+        } else if (category.type !== 'salary') {
+            totalHours += totals[category.id].hours;
         }
-    });
-
+        totalPay += totals[category.id].pay;
+    }
+});
     // Update monthly totals
     const totalDaysElement = document.getElementById('month_total_days_summary');
     const totalHoursElement = document.getElementById('month_total_hours_summary');
