@@ -1133,7 +1133,14 @@ activeCategories.forEach(category => {
             
             if (totalDaysElement) totalDaysElement.textContent = totalDays.toFixed(1);
             if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
-            if (totalPayElement) totalPayElement.textContent = `${totalPay.toFixed(2)}`;
+            if (totalPayElement) {
+    if (overtimeHours > 0) {
+        const regularPay = totalPay - overtimePay;
+        totalPayElement.textContent = `Reg: $${regularPay.toFixed(2)} + OT: $${overtimePay.toFixed(2)} = $${totalPay.toFixed(2)}`;
+    } else {
+        totalPayElement.textContent = `$${totalPay.toFixed(2)}`;
+    }
+}
               
     // Update monthly summary after weekly calculations are complete
     updateMonthlySummary();
