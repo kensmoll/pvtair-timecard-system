@@ -579,7 +579,8 @@ activeCategories.forEach(category => {
     const totalPayElement = document.getElementById('month_total_pay_summary');
     
     if (totalDaysElement) totalDaysElement.textContent = totalDays.toFixed(1);
-if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);    if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(2)}`;
+if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);    
+    if (totalPayElement) totalPayElement.textContent = `$${totalPay.toFixed(2)}`;
 }
  function setupWeekDefault() {
     const today = new Date();
@@ -1132,7 +1133,13 @@ activeCategories.forEach(category => {
             const totalPayElement = document.getElementById('week_total_pay_summary');
             
             if (totalDaysElement) totalDaysElement.textContent = totalDays.toFixed(1);
-            if (totalHoursElement) totalHoursElement.textContent = totalHours.toFixed(1);
+            if (totalHoursElement) {
+    if (overtimeHours > 0) {
+        totalHoursElement.textContent = `Reg: ${regularHours.toFixed(1)} + OT: ${overtimeHours.toFixed(1)} = ${totalHours.toFixed(1)}`;
+    } else {
+        totalHoursElement.textContent = totalHours.toFixed(1);
+    }
+}
             if (totalPayElement) {
     if (overtimeHours > 0) {
         const regularPay = totalPay - overtimePay;
